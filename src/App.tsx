@@ -8,12 +8,28 @@ import type { SiteConfig } from "./lib/types";
 import "./styles.css";
 
 const siteConfig = rawConfig as SiteConfig;
-const STOCK_SOURCE_URL =
-  "https://raw.githubusercontent.com/primalawakeningfunds/Stock/main/stock.json";
+const STOCK_SOURCE_URL = "/stock.json";
+const STOCK_REFRESH_MS = 30_000;
+
+function parseStockValue(rawValue: unknown): number | null {
+  if (typeof rawValue === "number" && Number.isFinite(rawValue)) {
+    return Math.max(0, Math.round(rawValue));
+  }
+  if (typeof rawValue === "string") {
+    const parsed = Number(rawValue.trim());
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.round(parsed));
+    }
+  }
+  return null;
+}
 
 export default function App() {
-  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
-  const [selectedRobuxAmount, setSelectedRobuxAmount] = useState<number | null>(null);
+  const defaultTier = siteConfig.tiers[0] ?? null;
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(defaultTier?.id ?? null);
+  const [selectedRobuxAmount, setSelectedRobuxAmount] = useState<number | null>(
+    defaultTier?.robuxAmount ?? null,
+  );
   const [customRobuxAmount, setCustomRobuxAmount] = useState(siteConfig.minimumCustomRobux);
   const [stockRobux, setStockRobux] = useState(0);
   const [stockError, setStockError] = useState("");
@@ -21,36 +37,27 @@ export default function App() {
   useEffect(() => {
     async function loadStock() {
       try {
-        const response = await fetch(STOCK_SOURCE_URL, { cache: "no-store" });
+        const stockUrl = new URL(STOCK_SOURCE_URL, window.location.origin);
+        stockUrl.searchParams.set("t", Date.now().toString());
+        const response = await fetch(stockUrl.toString(), { cache: "no-store" });
         if (!response.ok) {
-          throw new Error("Could not load remote stock configuration.");
+          throw new Error("Could not load stock configuration.");
         }
-        const data = (await response.json()) as { stockRobux?: number };
-        if (typeof data.stockRobux !== "number") {
-          throw new Error("Remote stock.json is missing a numeric stockRobux value.");
+        const data = (await response.json()) as { stockRobux?: unknown };
+        const parsedStock = parseStockValue(data.stockRobux);
+        if (parsedStock === null) {
+          throw new Error("Stock file is missing a numeric stockRobux value.");
         }
-        setStockRobux(Math.max(0, Math.round(data.stockRobux)));
+        setStockRobux(parsedStock);
+        setStockError("");
       } catch (error) {
-        try {
-          const fallback = await fetch("/stock.json", { cache: "no-store" });
-          if (!fallback.ok) {
-            throw new Error("Fallback stock file unavailable.");
-          }
-          const fallbackData = (await fallback.json()) as { stockRobux?: number };
-          if (typeof fallbackData.stockRobux !== "number") {
-            throw new Error("Fallback stock.json is invalid.");
-          }
-          setStockRobux(Math.max(0, Math.round(fallbackData.stockRobux)));
-          setStockError(
-            "Using fallback stock. Remote stock source could not be loaded.",
-          );
-        } catch {
-          setStockError(error instanceof Error ? error.message : "Stock unavailable.");
-          setStockRobux(0);
-        }
+        setStockError(error instanceof Error ? error.message : "Stock unavailable.");
+        setStockRobux(0);
       }
     }
     loadStock();
+    const intervalId = window.setInterval(loadStock, STOCK_REFRESH_MS);
+    return () => window.clearInterval(intervalId);
   }, []);
 
   const stockStatus = getStockStatus(
@@ -71,13 +78,14 @@ export default function App() {
         <div className="logo-mark">R$</div>
         <h1>{siteConfig.siteName}</h1>
         <p className="subtitle">
-          Support the project through donation tiers with a reference rate of $
-          {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux.
+          Support the project through donation tiers with an exchange rate of $
+          {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux!
         </p>
       </header>
 
       <section className="stock-banner">
-        <strong>Current stock:</strong> {stockRobux.toLocaleString()} Robux
+        <strong>Current stock:</strong>{" "}
+        <span className="stock-amount">R${stockRobux.toLocaleString()}</span>
         {stockError && <p className="helper-text warning">{stockError}</p>}
         {stockStatus.isOutOfStock && (
           <p className="helper-text warning">Out of stock. All support options are disabled.</p>

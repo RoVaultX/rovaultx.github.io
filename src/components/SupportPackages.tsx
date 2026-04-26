@@ -30,6 +30,7 @@ export function SupportPackages({
   onCustomChange,
   onSelect,
 }: SupportPackagesProps) {
+  const stackWords = (value: string) => value.split(" ").join("\n");
   const boundedMax = Math.min(maximumCustomRobux, Math.max(minimumCustomRobux, stockRobux));
   const safeCustomValue = clampWholeNumber(customValue, minimumCustomRobux, boundedMax);
   const customDisabled = !canFulfillRequest(safeCustomValue, stockRobux, isOutOfStock);
@@ -37,7 +38,7 @@ export function SupportPackages({
 
   return (
     <section>
-      <h2>Suggested Support Tiers</h2>
+      <h2>Tiers</h2>
       <div className="grid">
         {tiers.map((tier) => {
           const isDisabled = !canFulfillRequest(
@@ -59,16 +60,16 @@ export function SupportPackages({
               onClick={() => onSelect({ id: tier.id, robuxAmount: tier.robuxAmount })}
               disabled={isDisabled}
             >
-              <div className="tier-title">{tier.label}</div>
-              <div className="tier-amount">{tier.robuxAmount.toLocaleString()} Robux</div>
-              <div className="tier-price">
-                Suggested donation: {formatUsd(suggestedDonation)}
+              <div className="tier-title">{stackWords(tier.label)}</div>
+              <div className="tier-footer">
+                <div className="tier-price">{formatUsd(suggestedDonation)}</div>
+                <div className="tier-amount">R${tier.robuxAmount.toLocaleString()}</div>
+                {isDisabled ? (
+                  <div className="tier-note">Unavailable at current stock</div>
+                ) : (
+                  <div className="tier-note tier-note-available">Available now</div>
+                )}
               </div>
-              {isDisabled ? (
-                <div className="tier-note">Unavailable at current stock</div>
-              ) : (
-                <div className="tier-note">Available now</div>
-              )}
             </button>
           );
         })}
@@ -80,38 +81,39 @@ export function SupportPackages({
             onClick={() => onSelect({ id: "custom", robuxAmount: safeCustomValue })}
             disabled={isOutOfStock}
           >
-            <div className="tier-title">Custom Support</div>
-            <div className="tier-amount">R$ {safeCustomValue.toLocaleString()}</div>
-            <div className="tier-price">Suggested donation: {formatUsd(customDonation)}</div>
-            <label htmlFor="custom-tier-input" className="custom-label">
-              Enter custom Robux amount
-            </label>
-            <input
-              id="custom-tier-input"
-              className="custom-input"
-              type="number"
-              min={minimumCustomRobux}
-              max={boundedMax}
-              step={100}
-              value={safeCustomValue}
-              onClick={(event) => event.stopPropagation()}
-              onChange={(event) => {
-                const nextValue = clampWholeNumber(
-                  Number(event.target.value),
-                  minimumCustomRobux,
-                  boundedMax,
-                );
-                onCustomChange(nextValue);
-                onSelect({ id: "custom", robuxAmount: nextValue });
-              }}
-              disabled={isOutOfStock}
-            />
-            <div className="tier-note">
-              Range: {minimumCustomRobux.toLocaleString()} - {boundedMax.toLocaleString()} Robux
+            <div className="tier-title">{stackWords("Custom")}</div>
+            <div className="custom-middle">
+              <input
+                id="custom-tier-input"
+                className="custom-input"
+                type="number"
+                min={minimumCustomRobux}
+                max={boundedMax}
+                step={100}
+                value={safeCustomValue}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => {
+                  const nextValue = clampWholeNumber(
+                    Number(event.target.value),
+                    minimumCustomRobux,
+                    boundedMax,
+                  );
+                  onCustomChange(nextValue);
+                  onSelect({ id: "custom", robuxAmount: nextValue });
+                }}
+                disabled={isOutOfStock}
+              />
             </div>
-            {customDisabled && (
-              <div className="tier-note">Unavailable at current stock</div>
-            )}
+            <div className="custom-footer">
+              <div className="tier-price">{formatUsd(customDonation)}</div>
+              <div className="tier-amount">R${safeCustomValue.toLocaleString()}</div>
+              {customDisabled && (
+                <div className="tier-note">Unavailable at current stock</div>
+              )}
+              {!customDisabled && (
+                <div className="tier-note tier-note-available">Available now</div>
+              )}
+            </div>
           </button>
         )}
       </div>

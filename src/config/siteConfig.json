@@ -8,22 +8,22 @@
   "tiers": [
     {
       "id": "starter",
-      "label": "Starter Support",
+      "label": "Starter",
       "robuxAmount": 1000
     },
     {
       "id": "elite",
-      "label": "Elite Support",
+      "label": "Elite",
       "robuxAmount": 2500
     },
     {
       "id": "champion",
-      "label": "Champion Support",
+      "label": "Champion",
       "robuxAmount": 5000
     },
     {
       "id": "legendary",
-      "label": "Legendary Support",
+      "label": "Legendary",
       "robuxAmount": 10000
     }
   ]

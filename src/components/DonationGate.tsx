@@ -125,18 +125,27 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
       {requiresCaptcha && !turnstileReady && (
         <p className="helper-text">Loading verification challenge...</p>
       )}
-      <p className="helper-text">
-        Complete verification, then continue to PayPal with your selected suggested amount:
+      <p className="helper-text purchase-summary">
+        Complete verification, then continue to PayPal with your selected amount:
         {" "}
-        {suggestedDonation ? formatUsd(suggestedDonation) : "$0.00"}.
+        <span className="price-highlight">
+          {suggestedDonation ? formatUsd(suggestedDonation) : "$0.00"}
+        </span>
+        .
       </p>
+      {!disabled && !robuxAmount && (
+        <p className="helper-text warning">Select a tier to enable purchase.</p>
+      )}
+      {requiresCaptcha && turnstileReady && !token && !disabled && (
+        <p className="helper-text warning">Complete Cloudflare verification to enable purchase.</p>
+      )}
       <button
         type="button"
         className="continue-button"
         onClick={handleContinue}
         disabled={!canContinue || isSubmitting}
       >
-        {isSubmitting ? "Preparing secure redirect..." : "Continue to Donate"}
+        {isSubmitting ? "Preparing secure redirect..." : "Purchase"}
       </button>
       {errorMessage && <p className="helper-text warning">{errorMessage}</p>}
     </section>

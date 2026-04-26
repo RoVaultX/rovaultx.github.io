@@ -5,6 +5,13 @@
   line-height: 1.45;
 }
 
+:root {
+  --text-gradient: linear-gradient(180deg, #ffffff 0%, #dfe4ea 100%);
+  --green-gradient: linear-gradient(180deg, #50ff9a 0%, #18c865 100%);
+  --text-glow: 0 0 10px rgba(255, 255, 255, 0.2);
+  --green-glow: 0 0 14px rgba(41, 244, 122, 0.35);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -14,6 +21,14 @@ body {
   min-height: 100vh;
   background: radial-gradient(circle at top, #0b160f 0%, #040505 55%);
   color: #ffffff;
+}
+
+.container :is(h1, h2, .subtitle, .helper-text, .tier-title, .tier-price) {
+  background-image: var(--text-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: var(--text-glow);
 }
 
 .container {
@@ -33,14 +48,18 @@ header h1 {
   font-size: clamp(3.4rem, 14vw, 7rem);
   font-weight: 900;
   letter-spacing: -0.04em;
-  color: #29f47a;
+  background-image: var(--green-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   text-shadow: 0 0 32px rgba(41, 244, 122, 0.2);
   line-height: 0.9;
 }
 
 .subtitle {
-  color: #d5d7db;
+  color: #ffffff;
   font-size: 1rem;
+  font-weight: 700;
 }
 
 section {
@@ -52,25 +71,61 @@ section {
 }
 
 .stock-banner {
-  border-color: #1f3728;
-  background: #08110b;
+  border-color: #1a231d;
+  background: #090c0a;
+}
+
+.stock-banner strong {
+  font-size: 1.9rem;
+  font-weight: 900;
+}
+
+.stock-banner {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+section h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.stock-amount {
+  background-image: var(--green-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 900;
+  text-shadow: var(--green-glow);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
 }
 
 .tier-card {
-  text-align: left;
+  text-align: center;
   border: 1px solid #1f2a23;
   border-radius: 14px;
-  padding: 1rem;
-  background: #060807;
+  min-height: 260px;
+  padding: 1.25rem;
+  background-color: #060807;
+  background-image:
+    linear-gradient(rgba(6, 8, 7, 0.82), rgba(6, 8, 7, 0.82)),
+    url("/PrimalAwakeningLogo.png");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
   color: #ffffff;
   cursor: pointer;
   transition: border-color 120ms ease, transform 120ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .tier-card:hover {
@@ -90,46 +145,101 @@ section {
 }
 
 .tier-title {
-  font-weight: 700;
+  font-weight: 900;
   color: #ffffff;
+  font-size: clamp(1.5rem, 3.2vw, 2.15rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  white-space: pre-line;
+  min-height: calc(2 * 1.02em);
+}
+
+.tier-footer {
+  margin-top: auto;
 }
 
 .tier-amount {
-  margin-top: 0.3rem;
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #29f47a;
+  margin-top: 0.35rem;
+  font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+  font-weight: 900;
+  background-image: var(--green-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+  text-shadow: var(--green-glow);
 }
 
 .tier-price {
-  margin-top: 0.55rem;
-  color: #f2f4f6;
-  font-weight: 600;
+  margin-top: 0.3rem;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: clamp(1.3rem, 2.7vw, 1.8rem);
+  line-height: 1.05;
 }
 
 .tier-note {
-  margin-top: 0.5rem;
-  font-size: 0.86rem;
+  margin-top: 0.7rem;
+  font-size: 0.92rem;
   color: #b5bcc3;
+  font-weight: 700;
 }
 
-.custom-label {
-  display: block;
-  margin-top: 0.6rem;
-  margin-bottom: 0.3rem;
-  font-size: 0.82rem;
-  color: #c9ced4;
+.tier-note-available {
+  background-image: var(--green-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  text-shadow: var(--green-glow);
+}
+
+.stock-amount,
+.tier-amount,
+.tier-note-available,
+.price-highlight {
+  -webkit-text-fill-color: transparent;
 }
 
 .custom-input {
   width: 100%;
+  max-width: 220px;
   padding: 0.58rem 0.62rem;
   border-radius: 10px;
-  border: 1px solid #1f2f27;
-  background: #050605;
+  border: 1px solid #2a3a31;
+  background-color: #0a0d0b;
   color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
+  -webkit-text-fill-color: #ffffff;
+  text-shadow: none;
+}
+
+.custom-input::-webkit-outer-spin-button,
+.custom-input::-webkit-inner-spin-button {
+  opacity: 0.9;
+  filter: invert(1) brightness(1.15) contrast(1.15);
+}
+
+.custom-input[type="number"] {
+  appearance: auto;
+  -moz-appearance: auto;
+}
+
+.custom-range-note {
+  color: #ffffff;
+}
+
+.custom-middle {
+  margin-bottom: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.custom-footer {
+  margin-top: auto;
 }
 
 .continue-button {
@@ -137,7 +247,7 @@ section {
   border-radius: 10px;
   padding: 0.75rem 1.1rem;
   background: #29f47a;
-  color: #001107;
+  color: #ffffff;
   margin-top: 0.8rem;
   font-size: 1rem;
   font-weight: 800;
@@ -149,11 +259,39 @@ section {
   cursor: not-allowed;
 }
 
+.continue-button,
+.continue-button:disabled {
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: #ffffff;
+  text-shadow: none;
+}
+
 .helper-text {
   color: #c3c8ce;
   font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .helper-text.warning {
-  color: #ffd28d;
+  color: #ff3b3b;
+  background-image: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  -webkit-text-fill-color: #ff3b3b;
+  text-shadow: none;
+}
+
+.purchase-summary {
+  color: #ffffff;
+}
+
+.price-highlight {
+  background-image: var(--green-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  text-shadow: var(--green-glow);
 }
