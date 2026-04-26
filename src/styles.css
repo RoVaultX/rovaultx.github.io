@@ -1,0 +1,117 @@
+:root {
+  font-family: Inter, Segoe UI, sans-serif;
+  color: #f4f4f5;
+  background: #0f1117;
+  line-height: 1.4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.subtitle {
+  color: #b8c0d0;
+}
+
+section {
+  margin-top: 1.5rem;
+  border: 1px solid #2b3040;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #171b26;
+}
+
+.stock-banner {
+  background: #1c2230;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.tier-card {
+  text-align: left;
+  border: 1px solid #3a4258;
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: #121723;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tier-card.selected {
+  border-color: #5f7cff;
+}
+
+.tier-card:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tier-title {
+  font-weight: 600;
+}
+
+.tier-amount {
+  margin-top: 0.2rem;
+  font-size: 1.1rem;
+}
+
+.tier-price {
+  margin-top: 0.4rem;
+  color: #96dfb3;
+}
+
+.tier-note {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #a9b4c9;
+}
+
+.custom-card input {
+  width: 100%;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #3a4258;
+  background: #121723;
+  color: #f4f4f5;
+}
+
+.continue-button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  background: #5f7cff;
+  color: #ffffff;
+  margin-top: 0.8rem;
+  cursor: pointer;
+}
+
+.continue-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.helper-text {
+  color: #a9b4c9;
+  font-size: 0.9rem;
+}
+
+.helper-text.warning {
+  color: #f3bd81;
+}

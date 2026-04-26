@@ -1,0 +1,6 @@
+name = "primalawakeningfunds-gateway"
+main = "worker/index.ts"
+compatibility_date = "2026-04-26"
+
+[vars]
+FRONTEND_ORIGIN = "https://primalawakeningfunds.github.io"
