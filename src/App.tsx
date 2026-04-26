@@ -1,6 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import rawConfig from "./config/siteConfig.json";
-import { CustomSupportCalculator } from "./components/CustomSupportCalculator";
 import { DonationGate } from "./components/DonationGate";
 import { SupportPackages } from "./components/SupportPackages";
 import { calculateSuggestedDonation } from "./lib/pricing";
@@ -9,13 +8,53 @@ import type { SiteConfig } from "./lib/types";
 import "./styles.css";
 
 const siteConfig = rawConfig as SiteConfig;
+const STOCK_SOURCE_URL =
+  "https://raw.githubusercontent.com/primalawakeningfunds/Stock/main/stock.json";
 
 export default function App() {
   const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
   const [selectedRobuxAmount, setSelectedRobuxAmount] = useState<number | null>(null);
+  const [customRobuxAmount, setCustomRobuxAmount] = useState(siteConfig.minimumCustomRobux);
+  const [stockRobux, setStockRobux] = useState(0);
+  const [stockError, setStockError] = useState("");
+
+  useEffect(() => {
+    async function loadStock() {
+      try {
+        const response = await fetch(STOCK_SOURCE_URL, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error("Could not load remote stock configuration.");
+        }
+        const data = (await response.json()) as { stockRobux?: number };
+        if (typeof data.stockRobux !== "number") {
+          throw new Error("Remote stock.json is missing a numeric stockRobux value.");
+        }
+        setStockRobux(Math.max(0, Math.round(data.stockRobux)));
+      } catch (error) {
+        try {
+          const fallback = await fetch("/stock.json", { cache: "no-store" });
+          if (!fallback.ok) {
+            throw new Error("Fallback stock file unavailable.");
+          }
+          const fallbackData = (await fallback.json()) as { stockRobux?: number };
+          if (typeof fallbackData.stockRobux !== "number") {
+            throw new Error("Fallback stock.json is invalid.");
+          }
+          setStockRobux(Math.max(0, Math.round(fallbackData.stockRobux)));
+          setStockError(
+            "Using fallback stock. Remote stock source could not be loaded.",
+          );
+        } catch {
+          setStockError(error instanceof Error ? error.message : "Stock unavailable.");
+          setStockRobux(0);
+        }
+      }
+    }
+    loadStock();
+  }, []);
 
   const stockStatus = getStockStatus(
-    siteConfig.stockRobux,
+    stockRobux,
     siteConfig.lowStockThresholdRobux,
   );
 
@@ -29,6 +68,7 @@ export default function App() {
   return (
     <main className="container">
       <header>
+        <div className="logo-mark">R$</div>
         <h1>{siteConfig.siteName}</h1>
         <p className="subtitle">
           Support the project through donation tiers with a reference rate of $
@@ -37,7 +77,8 @@ export default function App() {
       </header>
 
       <section className="stock-banner">
-        <strong>Current stock:</strong> {siteConfig.stockRobux.toLocaleString()} Robux
+        <strong>Current stock:</strong> {stockRobux.toLocaleString()} Robux
+        {stockError && <p className="helper-text warning">{stockError}</p>}
         {stockStatus.isOutOfStock && (
           <p className="helper-text warning">Out of stock. All support options are disabled.</p>
         )}
@@ -51,26 +92,17 @@ export default function App() {
       <SupportPackages
         tiers={siteConfig.tiers}
         rateUsdPer1000Robux={siteConfig.rateUsdPer1000Robux}
-        stockRobux={siteConfig.stockRobux}
+        stockRobux={stockRobux}
         isOutOfStock={stockStatus.isOutOfStock}
         selectedId={selectedTierId}
+        allowCustom={siteConfig.allowCustom}
+        minimumCustomRobux={siteConfig.minimumCustomRobux}
+        maximumCustomRobux={siteConfig.maximumCustomRobux}
+        customValue={customRobuxAmount}
+        onCustomChange={setCustomRobuxAmount}
         onSelect={({ id, robuxAmount }) => {
           setSelectedTierId(id);
           setSelectedRobuxAmount(robuxAmount);
-        }}
-      />
-
-      <CustomSupportCalculator
-        allowCustom={siteConfig.allowCustom}
-        minRobux={siteConfig.minimumCustomRobux}
-        maxRobux={siteConfig.maximumCustomRobux}
-        stockRobux={siteConfig.stockRobux}
-        rateUsdPer1000Robux={siteConfig.rateUsdPer1000Robux}
-        isOutOfStock={stockStatus.isOutOfStock}
-        selectedValue={selectedTierId === "custom" ? selectedRobuxAmount : null}
-        onSelectCustom={(value) => {
-          setSelectedTierId("custom");
-          setSelectedRobuxAmount(value);
         }}
       />
 

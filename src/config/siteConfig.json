@@ -1,10 +1,9 @@
 {
   "siteName": "Primal Awakening Funds",
   "rateUsdPer1000Robux": 6.5,
-  "stockRobux": 125000,
   "lowStockThresholdRobux": 15000,
   "allowCustom": true,
-  "minimumCustomRobux": 500,
+  "minimumCustomRobux": 1000,
   "maximumCustomRobux": 50000,
   "tiers": [
     {
@@ -13,18 +12,18 @@
       "robuxAmount": 1000
     },
     {
-      "id": "booster",
-      "label": "Booster Support",
+      "id": "elite",
+      "label": "Elite Support",
       "robuxAmount": 2500
     },
     {
-      "id": "growth",
-      "label": "Growth Support",
+      "id": "champion",
+      "label": "Champion Support",
       "robuxAmount": 5000
     },
     {
-      "id": "elite",
-      "label": "Elite Support",
+      "id": "legendary",
+      "label": "Legendary Support",
       "robuxAmount": 10000
     }
   ]

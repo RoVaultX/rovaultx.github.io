@@ -37,19 +37,20 @@ npm run worker:dev
 
 ## Editable Business Config
 
-Update support tiers and stock in:
+Update support tiers in:
 
 - `src/config/siteConfig.json`
+- Update live stock in:
+- `public/stock.json`
 
 Fields:
 
 - `rateUsdPer1000Robux`: reference pricing rate (`6.5` by default)
-- `stockRobux`: current available stock
 - `lowStockThresholdRobux`: when to show low-stock warning
 - `tiers`: editable package list
 - `allowCustom`, `minimumCustomRobux`, `maximumCustomRobux`: custom option controls
 
-If `stockRobux` is `0`, all tiers and custom flow are disabled.
+If `stockRobux` in `public/stock.json` is `0`, all tiers and custom flow are disabled.
 
 ## Worker Setup (Cloudflare)
 

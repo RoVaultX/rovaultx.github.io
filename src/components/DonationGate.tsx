@@ -29,38 +29,50 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
   const [widgetId, setWidgetId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [turnstileReady, setTurnstileReady] = useState(false);
+
+  const requiresCaptcha = Boolean(turnstileSiteKey);
 
   const canContinue = useMemo(() => {
-    return Boolean(robuxAmount && suggestedDonation && token && !disabled);
-  }, [disabled, robuxAmount, suggestedDonation, token]);
+    if (!robuxAmount || !suggestedDonation || disabled) {
+      return false;
+    }
+    if (!requiresCaptcha) {
+      return true;
+    }
+    return Boolean(token);
+  }, [disabled, robuxAmount, requiresCaptcha, suggestedDonation, token]);
 
   useEffect(() => {
-    if (!turnstileSiteKey) {
+    if (!requiresCaptcha) {
+      setTurnstileReady(true);
       return;
     }
-    if (!window.turnstile) {
-      return;
-    }
-    if (widgetId) {
-      return;
-    }
+    if (widgetId) return;
 
-    const id = window.turnstile.render("#turnstile-widget", {
-      sitekey: turnstileSiteKey,
-      callback: (value: string) => {
-        setToken(value);
-        setErrorMessage("");
-      },
-      "expired-callback": () => setToken(""),
-      "error-callback": () => {
-        setToken("");
-        setErrorMessage("Captcha verification failed. Please try again.");
-      },
-      theme: "dark",
-    });
+    const renderWidget = () => {
+      if (!window.turnstile || widgetId) return;
+      const id = window.turnstile.render("#turnstile-widget", {
+        sitekey: turnstileSiteKey,
+        callback: (value: string) => {
+          setToken(value);
+          setErrorMessage("");
+        },
+        "expired-callback": () => setToken(""),
+        "error-callback": () => {
+          setToken("");
+          setErrorMessage("Captcha verification failed. Please try again.");
+        },
+        theme: "dark",
+      });
+      setWidgetId(id);
+      setTurnstileReady(true);
+    };
 
-    setWidgetId(id);
-  }, [widgetId]);
+    renderWidget();
+    const intervalId = window.setInterval(renderWidget, 300);
+    return () => window.clearInterval(intervalId);
+  }, [requiresCaptcha, turnstileSiteKey, widgetId]);
 
   async function handleContinue() {
     if (!canContinue || !robuxAmount || !suggestedDonation) {
@@ -106,10 +118,13 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
       <h2>Secure Donation Access</h2>
       {!turnstileSiteKey && (
         <p className="helper-text warning">
-          Missing `VITE_TURNSTILE_SITE_KEY`. Add it to enable captcha verification.
+          Captcha is not configured. Add `VITE_TURNSTILE_SITE_KEY` to enforce verification.
         </p>
       )}
       <div id="turnstile-widget" />
+      {requiresCaptcha && !turnstileReady && (
+        <p className="helper-text">Loading verification challenge...</p>
+      )}
       <p className="helper-text">
         Complete verification, then continue to PayPal with your selected suggested amount:
         {" "}
@@ -119,7 +134,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         type="button"
         className="continue-button"
         onClick={handleContinue}
-        disabled={!canContinue || isSubmitting || !turnstileSiteKey}
+        disabled={!canContinue || isSubmitting}
       >
         {isSubmitting ? "Preparing secure redirect..." : "Continue to Donate"}
       </button>

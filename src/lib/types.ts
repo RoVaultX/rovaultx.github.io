@@ -7,7 +7,6 @@ export type TierConfig = {
 export type SiteConfig = {
   siteName: string;
   rateUsdPer1000Robux: number;
-  stockRobux: number;
   lowStockThresholdRobux: number;
   allowCustom: boolean;
   minimumCustomRobux: number;
