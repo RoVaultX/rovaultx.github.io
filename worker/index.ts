@@ -84,6 +84,21 @@ function isRateLimited(ip: string): boolean {
   return recent.length > maxRequests;
 }
 
+function buildPayPalRedirectUrl(baseUrl: string, frontendOrigin: string): string {
+  const redirectUrl = new URL(baseUrl);
+  const returnUrl = `${frontendOrigin}/thank-you`;
+  if (!redirectUrl.searchParams.has("return")) {
+    redirectUrl.searchParams.set("return", returnUrl);
+  }
+  if (!redirectUrl.searchParams.has("cancel_return")) {
+    redirectUrl.searchParams.set("cancel_return", returnUrl);
+  }
+  if (!redirectUrl.searchParams.has("rm")) {
+    redirectUrl.searchParams.set("rm", "2");
+  }
+  return redirectUrl.toString();
+}
+
 async function verifyTurnstile(token: string, env: Env, ip: string | null): Promise<boolean> {
   const body = new FormData();
   body.append("secret", env.TURNSTILE_SECRET_KEY);
@@ -167,7 +182,10 @@ export default {
       if (!verified || !verified.exp || Date.now() / 1000 > verified.exp) {
         return new Response("Invalid or expired handoff.", { status: 401 });
       }
-      return Response.redirect(env.PAYPAL_DONATION_URL, 302);
+      return Response.redirect(
+        buildPayPalRedirectUrl(env.PAYPAL_DONATION_URL, env.FRONTEND_ORIGIN),
+        302,
+      );
     }
 
     return new Response("Not Found", { status: 404 });
