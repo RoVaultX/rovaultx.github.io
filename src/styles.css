@@ -321,6 +321,7 @@ section h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   min-width: 190px;
   padding: 0.72rem 1rem;
   border-radius: 10px;
@@ -336,6 +337,13 @@ section h2 {
 
 .join-server-button:hover {
   filter: brightness(1.08);
+}
+
+.discord-button-icon {
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 .discord-widget-wrap iframe {
