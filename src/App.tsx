@@ -84,7 +84,7 @@ export default function App() {
       </header>
 
       <section className="stock-banner">
-        <strong>Current stock:</strong>{" "}
+        <strong>Current Stock:</strong>{" "}
         <span className="stock-amount">R${stockRobux.toLocaleString()}</span>
         {stockError && <p className="helper-text warning">{stockError}</p>}
         {stockStatus.isOutOfStock && (

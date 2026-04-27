@@ -90,9 +90,9 @@ export function SupportPackages({
                 <div className="tier-price">{formatUsd(suggestedDonation)}</div>
                 <div className="tier-amount">R${tier.robuxAmount.toLocaleString()}</div>
                 {isDisabled ? (
-                  <div className="tier-note">Unavailable at current stock</div>
+                  <div className="tier-note">Unavailable at current stock!</div>
                 ) : (
-                  <div className="tier-note tier-note-available">Available now</div>
+                  <div className="tier-note tier-note-available">Available</div>
                 )}
               </div>
             </button>
@@ -160,10 +160,10 @@ export function SupportPackages({
               <div className="tier-price">{formatUsd(customDonation)}</div>
               <div className="tier-amount">R${safeCustomValue.toLocaleString()}</div>
               {customDisabled && (
-                <div className="tier-note">Unavailable at current stock</div>
+                <div className="tier-note">Unavailable at current stock!</div>
               )}
               {!customDisabled && (
-                <div className="tier-note tier-note-available">Available now</div>
+                <div className="tier-note tier-note-available">Available</div>
               )}
             </div>
           </button>
