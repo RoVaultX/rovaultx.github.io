@@ -76,7 +76,7 @@ npm run worker:deploy
 
 The configured donation target should be:
 
-- [PayPal donation page](https://www.paypal.com/donate/?hosted_button_id=SZG7N4HCC8YQU)
+- [PayPal donation page](https://www.paypal.com/donate/?hosted_button_id=)
 
 Use this value for `PAYPAL_DONATION_URL` secret.
 
