@@ -89,6 +89,6 @@ Workflow file:
 Required GitHub repository secrets:
 
 - `VITE_TURNSTILE_SITE_KEY`
-- `VITE_WORKER_API_BASE` (your deployed Worker URL, for example `https://RoVaultXLogo-gateway.<subdomain>.workers.dev`)
+- `VITE_WORKER_API_BASE` (your deployed Worker URL, for example `https://RoVaultX-gateway.<subdomain>.workers.dev`)
 
 Every push to `main` builds and deploys the React site to GitHub Pages.
