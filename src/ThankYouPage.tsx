@@ -53,7 +53,7 @@ export default function ThankYouPage() {
             allowTransparency={true}
             frameBorder="0"
             sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-            title="Primal Awakening Discord"
+            title="RoVaultX Discord"
           />
         </div>
       </section>

@@ -1,6 +1,6 @@
-# PrimalAwakeningFunds
+# RoVaultX
 
-Donation-focused React website for `primalawakeningfunds.github.io` with:
+Donation-focused React website for `rovaultx.github.io` with:
 
 - Configurable support tiers and custom amount calculator
 - Stock-based tier disabling (low stock and out-of-stock behavior)
@@ -64,7 +64,7 @@ wrangler secret put HANDOFF_SECRET
 
 Set worker vars in `wrangler.toml`:
 
-- `FRONTEND_ORIGIN` should be `https://primalawakeningfunds.github.io`
+- `FRONTEND_ORIGIN` should be `https://rovaultx.github.io`
 
 Deploy worker:
 
@@ -89,6 +89,6 @@ Workflow file:
 Required GitHub repository secrets:
 
 - `VITE_TURNSTILE_SITE_KEY`
-- `VITE_WORKER_API_BASE` (your deployed Worker URL, for example `https://primalawakeningfunds-gateway.<subdomain>.workers.dev`)
+- `VITE_WORKER_API_BASE` (your deployed Worker URL, for example `https://RoVaultXLogo-gateway.<subdomain>.workers.dev`)
 
 Every push to `main` builds and deploys the React site to GitHub Pages.

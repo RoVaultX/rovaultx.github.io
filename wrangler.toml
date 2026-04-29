@@ -1,6 +1,6 @@
-name = "primalawakeningfunds-gateway"
+name = "rovaultx-gateway"
 main = "worker/index.ts"
 compatibility_date = "2026-04-26"
 
 [vars]
-FRONTEND_ORIGIN = "https://primalawakeningfunds.github.io"
+FRONTEND_ORIGIN = "https://rovaultx.github.io"

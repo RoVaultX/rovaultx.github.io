@@ -85,7 +85,9 @@ export function SupportPackages({
               onClick={() => onSelect({ id: tier.id, robuxAmount: tier.robuxAmount })}
               disabled={isDisabled}
             >
-              <div className="tier-title">{stackWords(tier.label)}</div>
+              <div className="tier-header">
+                <div className="tier-title">{stackWords(tier.label)}</div>
+              </div>
               <div className="tier-footer">
                 <div className="tier-price">{formatUsd(suggestedDonation)}</div>
                 <div className="tier-amount">R${tier.robuxAmount.toLocaleString()}</div>
@@ -106,7 +108,9 @@ export function SupportPackages({
             onClick={() => onSelect({ id: "custom", robuxAmount: safeCustomValue })}
             disabled={isOutOfStock}
           >
-            <div className="tier-title">{stackWords("Custom")}</div>
+            <div className="tier-header">
+               <div className="tier-title">{stackWords("Custom")}</div>
+            </div>
             <div className="custom-middle">
               <input
                 id="custom-tier-input"

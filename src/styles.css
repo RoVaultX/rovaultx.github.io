@@ -117,8 +117,7 @@ section h2 {
   padding: 1.25rem;
   background-color: #060807;
   background-image:
-    linear-gradient(rgba(6, 8, 7, 0.82), rgba(6, 8, 7, 0.82)),
-    url("/PrimalAwakeningLogo.png");
+    linear-gradient(rgba(6, 8, 7, 0.82), rgba(6, 8, 7, 0.82));
   background-repeat: no-repeat;
   background-position: center top;
   background-size: cover;
@@ -154,6 +153,10 @@ section h2 {
   letter-spacing: -0.02em;
   white-space: pre-line;
   min-height: calc(2 * 1.02em);
+}
+
+.tier-header {
+  margin-top: auto;
 }
 
 .tier-footer {
