@@ -31,7 +31,7 @@ function PaymentMethodLogo({ methodId }: { methodId: PaymentMethodOption["id"] }
     case "card":
       return <span className="payment-logo payment-logo-card" aria-hidden="true">CC</span>;
     case "bank":
-      return <span className="payment-logo payment-logo-bank" aria-hidden="true">BNK</span>;
+      return <span className="payment-logo payment-logo-bank" aria-hidden="true">B</span>;
     case "klarna":
       return <span className="payment-logo payment-logo-klarna" aria-hidden="true">K</span>;
     case "link":
