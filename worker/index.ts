@@ -10,6 +10,11 @@ type TurnstileVerifyResponse = {
   "error-codes"?: string[];
 };
 
+type TurnstileVerifyResult = {
+  success: boolean;
+  errorCodes: string[];
+};
+
 const rateMap = new Map<string, number[]>();
 const encoder = new TextEncoder();
 
@@ -99,7 +104,23 @@ function buildPayPalRedirectUrl(baseUrl: string, frontendOrigin: string): string
   return redirectUrl.toString();
 }
 
-async function verifyTurnstile(token: string, env: Env, ip: string | null): Promise<boolean> {
+function normalizeIpAddress(rawValue: string | null): string | null {
+  if (!rawValue) {
+    return null;
+  }
+
+  const candidate = rawValue.split(",")[0]?.trim() ?? "";
+  if (!candidate) {
+    return null;
+  }
+
+  // Keep this permissive enough for IPv4/IPv6 while filtering obvious garbage values.
+  const isIPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(candidate);
+  const isIPv6 = /^[0-9a-fA-F:]+$/.test(candidate) && candidate.includes(":");
+  return isIPv4 || isIPv6 ? candidate : null;
+}
+
+async function verifyTurnstile(token: string, env: Env, ip: string | null): Promise<TurnstileVerifyResult> {
   const body = new FormData();
   body.append("secret", env.TURNSTILE_SECRET_KEY);
   body.append("response", token);
@@ -111,17 +132,20 @@ async function verifyTurnstile(token: string, env: Env, ip: string | null): Prom
     body,
   });
   if (!response.ok) {
-    return false;
+    return { success: false, errorCodes: ["siteverify-request-failed"] };
   }
   const data = (await response.json()) as TurnstileVerifyResponse;
-  return Boolean(data.success);
+  return {
+    success: Boolean(data.success),
+    errorCodes: data["error-codes"] ?? [],
+  };
 }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const origin = request.headers.get("Origin") ?? "";
-    const requestIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
+    const requestIp = normalizeIpAddress(request.headers.get("CF-Connecting-IP"));
     const allowedOrigin = env.FRONTEND_ORIGIN;
 
     if (request.method === "OPTIONS") {
@@ -153,9 +177,13 @@ export default {
         return jsonResponse({ error: "Invalid request body." }, 400, allowedOrigin);
       }
 
-      const captchaOk = await verifyTurnstile(payload.token, env, requestIp);
-      if (!captchaOk) {
-        return jsonResponse({ error: "Captcha validation failed." }, 401, allowedOrigin);
+      const captchaResult = await verifyTurnstile(payload.token, env, requestIp);
+      if (!captchaResult.success) {
+        return jsonResponse(
+          { error: "Captcha validation failed.", details: captchaResult.errorCodes },
+          401,
+          allowedOrigin,
+        );
       }
 
       const signed = await createSignedToken(
