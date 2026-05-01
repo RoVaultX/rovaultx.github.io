@@ -292,6 +292,33 @@ section h2 {
   color: #ffffff;
 }
 
+.payment-methods {
+  margin-top: 0.8rem;
+  border: 1px solid #1f2a23;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+}
+
+.payment-methods-legend {
+  padding: 0 0.3rem;
+}
+
+.payment-option {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.payment-option input {
+  margin-top: 0.2rem;
+}
+
+.payment-option-description {
+  display: block;
+}
+
 .price-highlight {
   background-image: var(--green-gradient);
   -webkit-background-clip: text;

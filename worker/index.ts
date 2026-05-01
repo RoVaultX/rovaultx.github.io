@@ -1,6 +1,7 @@
 type Env = {
   TURNSTILE_SECRET_KEY: string;
   PAYPAL_DONATION_URL: string;
+  STRIPE_DONATION_URL: string;
   FRONTEND_ORIGIN: string;
   HANDOFF_SECRET: string;
 };
@@ -63,7 +64,10 @@ async function verifySignedToken(token: string, secret: string) {
   }
   try {
     const payloadText = base64UrlDecode(payloadPart);
-    return JSON.parse(payloadText) as { exp?: number };
+    return JSON.parse(payloadText) as {
+      exp?: number;
+      paymentProvider?: "paypal" | "stripe";
+    };
   } catch {
     return null;
   }
@@ -87,6 +91,10 @@ function isRateLimited(ip: string): boolean {
   recent.push(now);
   rateMap.set(ip, recent);
   return recent.length > maxRequests;
+}
+
+function getRateLimitKey(ip: string | null): string {
+  return ip ?? "anonymous";
 }
 
 function buildPayPalRedirectUrl(baseUrl: string, frontendOrigin: string): string {
@@ -163,7 +171,7 @@ export default {
       if (origin !== allowedOrigin) {
         return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
       }
-      if (isRateLimited(requestIp)) {
+      if (isRateLimited(getRateLimitKey(requestIp))) {
         return jsonResponse({ error: "Too many requests. Try again later." }, 429, allowedOrigin);
       }
 
@@ -171,10 +179,19 @@ export default {
         token?: string;
         robuxAmount?: number;
         suggestedDonation?: number;
+        paymentProvider?: "paypal" | "stripe";
       };
 
-      if (!payload.token || !payload.robuxAmount || !payload.suggestedDonation) {
+      if (
+        !payload.token ||
+        !payload.robuxAmount ||
+        !payload.suggestedDonation ||
+        !payload.paymentProvider
+      ) {
         return jsonResponse({ error: "Invalid request body." }, 400, allowedOrigin);
+      }
+      if (payload.paymentProvider !== "paypal" && payload.paymentProvider !== "stripe") {
+        return jsonResponse({ error: "Invalid payment provider." }, 400, allowedOrigin);
       }
 
       const captchaResult = await verifyTurnstile(payload.token, env, requestIp);
@@ -191,6 +208,7 @@ export default {
           exp: Math.floor(Date.now() / 1000) + 300,
           robuxAmount: payload.robuxAmount,
           suggestedDonation: payload.suggestedDonation,
+          paymentProvider: payload.paymentProvider,
         },
         env.HANDOFF_SECRET,
       );
@@ -209,6 +227,10 @@ export default {
       const verified = await verifySignedToken(token, env.HANDOFF_SECRET);
       if (!verified || !verified.exp || Date.now() / 1000 > verified.exp) {
         return new Response("Invalid or expired handoff.", { status: 401 });
+      }
+      const paymentProvider = verified.paymentProvider ?? "paypal";
+      if (paymentProvider === "stripe") {
+        return Response.redirect(env.STRIPE_DONATION_URL, 302);
       }
       return Response.redirect(
         buildPayPalRedirectUrl(env.PAYPAL_DONATION_URL, env.FRONTEND_ORIGIN),

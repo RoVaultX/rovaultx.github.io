@@ -59,6 +59,7 @@ Set Worker secrets:
 ```bash
 wrangler secret put TURNSTILE_SECRET_KEY
 wrangler secret put PAYPAL_DONATION_URL
+wrangler secret put STRIPE_DONATION_URL
 wrangler secret put HANDOFF_SECRET
 ```
 
@@ -77,8 +78,9 @@ npm run worker:deploy
 The configured donation target should be:
 
 - [PayPal donation page](https://www.paypal.com/donate/?hosted_button_id=)
+- [Stripe checkout link](https://donate.stripe.com/)
 
-Use this value for `PAYPAL_DONATION_URL` secret.
+Use these values for `PAYPAL_DONATION_URL` and `STRIPE_DONATION_URL` secrets.
 
 ## GitHub Pages Deployment
 

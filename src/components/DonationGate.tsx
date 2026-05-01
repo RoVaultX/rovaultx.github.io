@@ -11,6 +11,15 @@ type GateResponse = {
   redirectUrl: string;
 };
 
+type PaymentProvider = "paypal" | "stripe";
+
+type PaymentMethodOption = {
+  id: string;
+  provider: PaymentProvider;
+  label: string;
+  description: string;
+};
+
 declare global {
   interface Window {
     turnstile?: {
@@ -23,6 +32,44 @@ declare global {
 
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 const workerApiBase = import.meta.env.VITE_WORKER_API_BASE ?? "";
+const paymentMethodOptions: PaymentMethodOption[] = [
+  {
+    id: "paypal",
+    provider: "paypal",
+    label: "PayPal",
+    description: "Pay with PayPal wallet.",
+  },
+  {
+    id: "venmo",
+    provider: "paypal",
+    label: "Venmo",
+    description: "Pay with Venmo through PayPal checkout.",
+  },
+  {
+    id: "card",
+    provider: "stripe",
+    label: "Credit or debit card",
+    description: "Pay securely with card via Stripe Checkout.",
+  },
+  {
+    id: "cashapp",
+    provider: "stripe",
+    label: "Cash App Pay",
+    description: "Pay with Cash App through Stripe Checkout.",
+  },
+  {
+    id: "bank",
+    provider: "stripe",
+    label: "Bank transfer",
+    description: "Pay from your bank account via Stripe.",
+  },
+  {
+    id: "klarna",
+    provider: "stripe",
+    label: "Klarna",
+    description: "Use Klarna through Stripe Checkout.",
+  },
+];
 
 export function DonationGate({ robuxAmount, suggestedDonation, disabled }: DonationGateProps) {
   const [token, setToken] = useState("");
@@ -30,6 +77,12 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [turnstileReady, setTurnstileReady] = useState(false);
+  const [selectedMethodId, setSelectedMethodId] = useState<string>("paypal");
+
+  const selectedMethod = useMemo(
+    () => paymentMethodOptions.find((option) => option.id === selectedMethodId) ?? paymentMethodOptions[0],
+    [selectedMethodId],
+  );
 
   const requiresCaptcha = Boolean(turnstileSiteKey);
 
@@ -90,6 +143,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
           token,
           robuxAmount,
           suggestedDonation,
+          paymentProvider: selectedMethod.provider,
         }),
       });
 
@@ -126,13 +180,31 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         <p className="helper-text">Loading verification challenge...</p>
       )}
       <p className="helper-text purchase-summary">
-        Complete verification, then continue to PayPal with your selected amount:
+        Complete verification, choose your payment method, then continue with your selected amount:
         {" "}
         <span className="price-highlight">
           {suggestedDonation ? formatUsd(suggestedDonation) : "$0.00"}
         </span>
         .
       </p>
+      <fieldset className="payment-methods" disabled={disabled || isSubmitting}>
+        <legend className="helper-text payment-methods-legend">Payment options</legend>
+        {paymentMethodOptions.map((option) => (
+          <label key={option.id} className="payment-option">
+            <input
+              type="radio"
+              name="paymentMethod"
+              value={option.id}
+              checked={selectedMethodId === option.id}
+              onChange={() => setSelectedMethodId(option.id)}
+            />
+            <span>
+              <strong>{option.label}</strong>
+              <span className="helper-text payment-option-description">{option.description}</span>
+            </span>
+          </label>
+        ))}
+      </fieldset>
       {!disabled && !robuxAmount && (
         <p className="helper-text warning">Select a tier to enable purchase.</p>
       )}
@@ -145,7 +217,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         onClick={handleContinue}
         disabled={!canContinue || isSubmitting}
       >
-        {isSubmitting ? "Preparing secure redirect..." : "Purchase"}
+        {isSubmitting ? "Preparing secure redirect..." : `Continue with ${selectedMethod.label}`}
       </button>
       {errorMessage && <p className="helper-text warning">{errorMessage}</p>}
     </section>
