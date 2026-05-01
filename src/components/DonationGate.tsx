@@ -251,7 +251,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
       )}
       <button
         type="button"
-        className="continue-button"
+        className={`continue-button continue-button-${selectedMethod.id}`}
         onClick={handleContinue}
         disabled={!canContinue || isSubmitting}
       >

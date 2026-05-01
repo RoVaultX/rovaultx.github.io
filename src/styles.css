@@ -273,6 +273,48 @@ section h2 {
   text-shadow: none;
 }
 
+.continue-button-paypal {
+  background: linear-gradient(140deg, #0070e0 0%, #003087 100%);
+  border-color: #0070e0;
+}
+
+.continue-button-venmo {
+  background: linear-gradient(140deg, #008cff 0%, #1d4ed8 100%);
+  border-color: #008cff;
+}
+
+.continue-button-cashapp {
+  background: linear-gradient(140deg, #00c244 0%, #008a2a 100%);
+  border-color: #00c244;
+}
+
+.continue-button-card {
+  background: linear-gradient(140deg, #495261 0%, #1f2937 100%);
+  border-color: #495261;
+}
+
+.continue-button-bank {
+  background: linear-gradient(140deg, #29f47a 0%, #008a2a 100%);
+  border-color: #29f47a;
+}
+
+.continue-button-klarna {
+  background: linear-gradient(140deg, #ff7ad7 0%, #ff3ba5 100%);
+  border-color: #ff3ba5;
+}
+
+.continue-button-link {
+  background: linear-gradient(140deg, #34d399 0%, #16a34a 100%);
+  border-color: #16a34a;
+}
+
+.continue-button-amazonpay {
+  background: linear-gradient(140deg, #ffcf00 0%, #ff9900 100%);
+  border-color: #ff9900;
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+}
+
 .helper-text {
   color: #c3c8ce;
   font-size: 0.9rem;
@@ -355,7 +397,7 @@ section h2 {
 }
 
 .payment-logo-bank {
-  background: linear-gradient(140deg, #285e61 0%, #134e4a 100%);
+  background: linear-gradient(140deg, #29f47a 0%, #008a2a 100%);
 }
 
 .payment-logo-klarna {
@@ -363,11 +405,14 @@ section h2 {
 }
 
 .payment-logo-link {
-  background: linear-gradient(140deg, #6b4ce6 0%, #4f46e5 100%);
+  background: linear-gradient(140deg, #34d399 0%, #16a34a 100%);
 }
 
 .payment-logo-amazonpay {
-  background: linear-gradient(140deg, #f59e0b 0%, #b45309 100%);
+  background: linear-gradient(140deg, #ffcf00 0%, #ff9900 100%);
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+  border-color: rgba(17, 24, 39, 0.25);
 }
 
 .payment-option-description {
