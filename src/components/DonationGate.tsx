@@ -77,7 +77,7 @@ const paymentMethodOptions: PaymentMethodOption[] = [
   {
     id: "card",
     provider: "stripe",
-    label: "Credit or Debit Card",
+    label: "Debit/Credit Card",
     description: "Pay securely with card via Stripe Checkout.",
   },
   {
