@@ -362,6 +362,14 @@ section h2 {
   background: linear-gradient(140deg, #ff7ad7 0%, #ff3ba5 100%);
 }
 
+.payment-logo-link {
+  background: linear-gradient(140deg, #6b4ce6 0%, #4f46e5 100%);
+}
+
+.payment-logo-amazonpay {
+  background: linear-gradient(140deg, #f59e0b 0%, #b45309 100%);
+}
+
 .payment-option-description {
   display: block;
 }

@@ -34,6 +34,10 @@ function PaymentMethodLogo({ methodId }: { methodId: PaymentMethodOption["id"] }
       return <span className="payment-logo payment-logo-bank" aria-hidden="true">BNK</span>;
     case "klarna":
       return <span className="payment-logo payment-logo-klarna" aria-hidden="true">K</span>;
+    case "link":
+      return <span className="payment-logo payment-logo-link" aria-hidden="true">L</span>;
+    case "amazonpay":
+      return <span className="payment-logo payment-logo-amazonpay" aria-hidden="true">A</span>;
     default:
       return null;
   }
@@ -87,6 +91,18 @@ const paymentMethodOptions: PaymentMethodOption[] = [
     provider: "stripe",
     label: "Klarna",
     description: "Use Klarna via Stripe Checkout.",
+  },
+  {
+    id: "link",
+    provider: "stripe",
+    label: "Link",
+    description: "Use Link via Stripe Checkout.",
+  },
+  {
+    id: "amazonpay",
+    provider: "stripe",
+    label: "Amazon Pay",
+    description: "Use Amazon Pay via Stripe Checkout.",
   },
 ];
 
