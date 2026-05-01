@@ -43,7 +43,7 @@ const paymentMethodOptions: PaymentMethodOption[] = [
     id: "venmo",
     provider: "paypal",
     label: "Venmo",
-    description: "Pay with Venmo through PayPal checkout.",
+    description: "Pay with Venmo via PayPal checkout.",
   },
   {
     id: "card",
@@ -55,19 +55,19 @@ const paymentMethodOptions: PaymentMethodOption[] = [
     id: "cashapp",
     provider: "stripe",
     label: "Cash App Pay",
-    description: "Pay with Cash App through Stripe Checkout.",
+    description: "Pay with Cash App via Stripe Checkout.",
   },
   {
     id: "bank",
     provider: "stripe",
     label: "Bank transfer",
-    description: "Pay from your bank account via Stripe.",
+    description: "Pay from your bank account via Stripe Checkout.",
   },
   {
     id: "klarna",
     provider: "stripe",
     label: "Klarna",
-    description: "Use Klarna through Stripe Checkout.",
+    description: "Use Klarna via Stripe Checkout.",
   },
 ];
 
