@@ -17,7 +17,7 @@ export default function ThankYouPage() {
         <ul className="post-purchase-list">
           <li className="helper-text">Your transaction ID or proof of payment</li>
           <li className="helper-text">
-            A Roblox item link we can purchase from you (gamepass or t-shirt etc.)
+            A link to a roblox item we can purchase from you (preferably a gamepass that you own)
           </li>
         </ul>
       </section>
