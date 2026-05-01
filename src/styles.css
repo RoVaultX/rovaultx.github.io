@@ -315,6 +315,53 @@ section h2 {
   margin-top: 0.2rem;
 }
 
+.payment-option-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.payment-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 7px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  text-shadow: none;
+  -webkit-text-fill-color: #ffffff;
+}
+
+.payment-logo-paypal {
+  background: linear-gradient(140deg, #0070e0 0%, #003087 100%);
+}
+
+.payment-logo-venmo {
+  background: linear-gradient(140deg, #008cff 0%, #1d4ed8 100%);
+}
+
+.payment-logo-cashapp {
+  background: linear-gradient(140deg, #00c244 0%, #008a2a 100%);
+}
+
+.payment-logo-card {
+  background: linear-gradient(140deg, #495261 0%, #1f2937 100%);
+}
+
+.payment-logo-bank {
+  background: linear-gradient(140deg, #285e61 0%, #134e4a 100%);
+}
+
+.payment-logo-klarna {
+  background: linear-gradient(140deg, #ff7ad7 0%, #ff3ba5 100%);
+}
+
 .payment-option-description {
   display: block;
 }

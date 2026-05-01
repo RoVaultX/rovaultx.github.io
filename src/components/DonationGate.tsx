@@ -20,6 +20,25 @@ type PaymentMethodOption = {
   description: string;
 };
 
+function PaymentMethodLogo({ methodId }: { methodId: PaymentMethodOption["id"] }) {
+  switch (methodId) {
+    case "paypal":
+      return <span className="payment-logo payment-logo-paypal" aria-hidden="true">P</span>;
+    case "venmo":
+      return <span className="payment-logo payment-logo-venmo" aria-hidden="true">V</span>;
+    case "cashapp":
+      return <span className="payment-logo payment-logo-cashapp" aria-hidden="true">$</span>;
+    case "card":
+      return <span className="payment-logo payment-logo-card" aria-hidden="true">CC</span>;
+    case "bank":
+      return <span className="payment-logo payment-logo-bank" aria-hidden="true">BNK</span>;
+    case "klarna":
+      return <span className="payment-logo payment-logo-klarna" aria-hidden="true">K</span>;
+    default:
+      return null;
+  }
+}
+
 declare global {
   interface Window {
     turnstile?: {
@@ -46,21 +65,21 @@ const paymentMethodOptions: PaymentMethodOption[] = [
     description: "Pay with Venmo via PayPal checkout.",
   },
   {
-    id: "card",
-    provider: "stripe",
-    label: "Credit or debit card",
-    description: "Pay securely with card via Stripe Checkout.",
-  },
-  {
     id: "cashapp",
     provider: "stripe",
     label: "Cash App Pay",
     description: "Pay with Cash App via Stripe Checkout.",
   },
   {
+    id: "card",
+    provider: "stripe",
+    label: "Credit or Debit Card",
+    description: "Pay securely with card via Stripe Checkout.",
+  },
+  {
     id: "bank",
     provider: "stripe",
-    label: "Bank transfer",
+    label: "Bank Transfer",
     description: "Pay from your bank account via Stripe Checkout.",
   },
   {
@@ -198,9 +217,12 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
               checked={selectedMethodId === option.id}
               onChange={() => setSelectedMethodId(option.id)}
             />
-            <span>
-              <strong>{option.label}</strong>
-              <span className="helper-text payment-option-description">{option.description}</span>
+            <span className="payment-option-content">
+              <PaymentMethodLogo methodId={option.id} />
+              <span>
+                <strong>{option.label}</strong>
+                <span className="helper-text payment-option-description">{option.description}</span>
+              </span>
             </span>
           </label>
         ))}
