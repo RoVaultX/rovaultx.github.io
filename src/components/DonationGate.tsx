@@ -29,7 +29,7 @@ function PaymentMethodLogo({ methodId }: { methodId: PaymentMethodOption["id"] }
     case "cashapp":
       return <span className="payment-logo payment-logo-cashapp" aria-hidden="true">$</span>;
     case "card":
-      return <span className="payment-logo payment-logo-card" aria-hidden="true">CC</span>;
+      return <span className="payment-logo payment-logo-card" aria-hidden="true">C</span>;
     case "bank":
       return <span className="payment-logo payment-logo-bank" aria-hidden="true">B</span>;
     case "klarna":
