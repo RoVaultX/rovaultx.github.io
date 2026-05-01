@@ -71,7 +71,7 @@ const paymentMethodOptions: PaymentMethodOption[] = [
   {
     id: "cashapp",
     provider: "stripe",
-    label: "Cash App Pay",
+    label: "Cash App",
     description: "Pay with Cash App via Stripe Checkout.",
   },
   {
