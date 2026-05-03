@@ -9,22 +9,154 @@
     {
       "id": "starter",
       "label": "Starter",
-      "robuxAmount": 1000
+      "robuxAmount": 1000,
+      "rewardAmount": 1,
+      "rewardPool": {
+        "6x31 Starter (Picked from 1-27)": 4,
+        "Shiny Starter (Picked from 1-27)": 3,
+        "6x31 Shiny Starter (Picked from 1-27)": 5,
+
+        "Master Ball": 3,
+        "Ability Patch": 1,
+        "Evolution Item of Choice": 2
+      }
     },
     {
       "id": "elite",
       "label": "Elite",
-      "robuxAmount": 2500
-    },
-    {
-      "id": "champion",
-      "label": "Champion",
-      "robuxAmount": 5000
+      "robuxAmount": 2500,
+      "rewardAmount": 1,
+      "rewardPool": {
+        "6x31 Pokemon (Picked from 1-1025)": 4,
+        "Shiny Pokemon (Picked from 1-1025)": 3,
+        "6x31 Shiny Pokemon (Picked from 1-1025)": 5,
+
+        "2 Master Balls": 3,
+        "Mega Stone of Choice": 2,
+        "2 Evolution Items of Choice": 2
+      }
     },
     {
       "id": "legendary",
       "label": "Legendary",
-      "robuxAmount": 10000
+      "robuxAmount": 5000,
+      "rewardAmount": 2,
+      "rewardPool": {
+        "6x31 Legendary (Picked from 1-74)": 4,
+        "Shiny Legendary (Picked from 1-74)": 4,
+        "6x31 Shiny Legendary (Picked from 1-74)": 5,
+
+        "3 Master Balls": 4,
+        "2 Mega Stones of Choice": 2,
+        "Lucky Egg": 3,
+        "Bottlecaps": 4,
+        "Destiny Knot": 3,
+        "Mint of Choice": 3
+      }
+    },
+    {
+      "id": "mythical",
+      "label": "Mythical",
+      "robuxAmount": 10000,
+      "rewardAmount": 2,
+      "rewardPool": {
+        "6x31 Mythical (Picked from 1-23)": 4,
+        "Shiny Mythical (Picked from 1-23)": 4,
+        "6x31 Shiny Mythical (Picked from 1-23)": 5,
+
+        "Rainbow Mew": 5,
+        "Rainbow Bidoof": 5,
+
+        "6 Master Balls": 4,
+        "3 Mega Stones of Choice": 2,
+        "2 Lucky Eggs": 3,
+        "2 Bottlecaps": 4,
+        "2 Destiny Knots": 3,
+        "2 Mints of Choice": 3
+      }
+    }
+  ],
+  "customtiers": [
+    {
+      "id": "champion",
+      "label": "Champion",
+      "robuxAmount": 15000,
+      "rewardAmount": 3,
+      "rewardPool": {
+        "6x31 Legendary (Picked from 1-74)": 4,
+        "Shiny Legendary (Picked from 1-74)": 4,
+        "6x31 Shiny Legendary (Picked from 1-74)": 5,
+
+        "6x31 Mythical (Picked from 1-23)": 4,
+        "Shiny Mythical (Picked from 1-23)": 4,
+        "6x31 Shiny Mythical (Picked from 1-23)": 5,
+
+        "Rainbow Mew": 5,
+        "Rainbow Bidoof": 5,
+
+        "9 Master Balls": 4,
+        "Saddle of Choice": 4,
+        "3 Lucky Eggs": 3,
+        "3 Bottlecaps": 4,
+        "3 Destiny Knots": 3,
+        "3 Mints of Choice": 3
+      }
+    },
+    {
+      "id": "paradox",
+      "label": "Paradox",
+      "robuxAmount": 20000,
+      "rewardAmount": 3,
+      "rewardPool": {
+        "6x31 Legendary (Picked from 1-74)": 4,
+        "Shiny Legendary (Picked from 1-74)": 4,
+        "6x31 Shiny Legendary (Picked from 1-74)": 5,
+
+        "6x31 Mythical (Picked from 1-23)": 4,
+        "Shiny Mythical (Picked from 1-23)": 4,
+        "6x31 Shiny Mythical (Picked from 1-23)": 5,
+
+        "6x31 Paradox (Picked from 1-20)": 4,
+        "Shiny Paradox (Picked from 1-20)": 4,
+        "6x31 Shiny Paradox (Picked from 1-20)": 5,
+
+        "Shadow Mewtwo": 5,
+        
+        "12 Master Balls": 4,
+        "2 Saddles of Choice": 4,
+        "4 Lucky Eggs": 3,
+        "4 Bottlecaps": 4
+      }
+    },
+    {
+      "id": "halloffame",
+      "label": "Hall of Fame",
+      "robuxAmount": 25000,
+      "rewardAmount": 4,
+      "rewardPool": {
+        "6x31 Legendary (Picked from 1-74)": 4,
+        "Shiny Legendary (Picked from 1-74)": 4,
+        "6x31 Shiny Legendary (Picked from 1-74)": 5,
+
+        "6x31 Mythical (Picked from 1-23)": 4,
+        "Shiny Mythical (Picked from 1-23)": 4,
+        "6x31 Shiny Mythical (Picked from 1-23)": 5,
+
+        "6x31 Paradox (Picked from 1-20)": 4,
+        "Shiny Paradox (Picked from 1-20)": 4,
+        "6x31 Shiny Paradox (Picked from 1-20)": 5,
+
+        "6x31 Ultra Beast (Picked from 1-11)": 4,
+        "Shiny Ultra Beast (Picked from 1-11)": 4,
+        "6x31 Shiny Ultra Beast (Picked from 1-11)": 5,
+
+        "Shadow Mewtwo": 5,
+
+        "15 Master Balls": 4,
+        "3 Saddles of Choice": 4,
+        "5 Lucky Eggs": 3,
+        "5 Bottlecaps": 4
+      }
     }
   ]
 }

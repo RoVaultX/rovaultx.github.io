@@ -1,6 +1,29 @@
+import { useMemo } from "react";
+import rawConfig from "./config/siteConfig.json";
+import { RewardsPanel } from "./components/RewardsPanel";
+import { findRewardTierByRobuxAmount } from "./lib/rewards";
+import type { SiteConfig } from "./lib/types";
 import "./styles.css";
 
+const siteConfig = rawConfig as unknown as SiteConfig;
+
 export default function ThankYouPage() {
+  const rewardTier = useMemo(() => {
+    try {
+      const rawValue = window.localStorage.getItem("rovaultx:lastRewardTier");
+      if (!rawValue) {
+        return null;
+      }
+      const parsed = JSON.parse(rawValue) as { robuxAmount?: unknown; savedAt?: unknown };
+      if (typeof parsed.robuxAmount !== "number") {
+        return null;
+      }
+      return findRewardTierByRobuxAmount(parsed.robuxAmount, siteConfig.tiers, siteConfig.customtiers);
+    } catch {
+      return null;
+    }
+  }, []);
+
   return (
     <main className="container thank-you-page">
       <header className="site-header">
@@ -35,6 +58,8 @@ export default function ThankYouPage() {
           </li>
         </ul>
       </section>
+
+      <RewardsPanel tier={rewardTier} title="Rewards You Could Have Received" />
 
       <section>
         <h2>Discord Support</h2>

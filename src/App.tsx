@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import rawConfig from "./config/siteConfig.json";
 import { DonationGate } from "./components/DonationGate";
+import { RouletteSpinnerGroup } from "./components/RouletteSpinner";
 import { SupportPackages } from "./components/SupportPackages";
 import { calculateSuggestedDonation } from "./lib/pricing";
+import { findRewardTierByRobuxAmount } from "./lib/rewards";
 import { getStockStatus } from "./lib/stock";
 import type { PromoConfig, SiteConfig } from "./lib/types";
 import "./styles.css";
 
-const siteConfig = rawConfig as SiteConfig;
+const siteConfig = rawConfig as unknown as SiteConfig;
 const STOCK_SOURCE_URL = "/stock.json";
 const PROMOS_SOURCE_URL = "/promos.json";
 const STOCK_REFRESH_MS = 30_000;
@@ -126,6 +128,11 @@ export default function App() {
     return calculateSuggestedDonation(selectedRobuxAmount, siteConfig.rateUsdPer1000Robux);
   }, [selectedRobuxAmount]);
 
+  const selectedRewardTier = useMemo(
+    () => findRewardTierByRobuxAmount(selectedRobuxAmount, siteConfig.tiers, siteConfig.customtiers),
+    [selectedRobuxAmount],
+  );
+
   return (
     <main className="container">
       <header className="site-header">
@@ -144,7 +151,7 @@ export default function App() {
               </div>
               <p className="subtitle">
                 Support the development of Primal Awakening through donation tiers. Contribute to new content, creator funding, and future updates—while receiving Robux at a rate of $
-                {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux!
+                {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux and generated rewards based on your selected tier!
               </p>
             </div>
           </div>
@@ -184,8 +191,11 @@ export default function App() {
         }}
       />
 
+      <RouletteSpinnerGroup tier={selectedRewardTier} />
+
       <DonationGate
         robuxAmount={selectedRobuxAmount}
+        rewardTier={selectedRewardTier}
         suggestedDonation={suggestedDonation}
         promos={promos}
         promoLoadError={promoError}

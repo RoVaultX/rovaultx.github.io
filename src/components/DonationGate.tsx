@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "../lib/pricing";
-import type { PromoConfig } from "../lib/types";
+import type { PromoConfig, TierConfig } from "../lib/types";
 import { PaymentIcon, type PaymentMethodId } from "./PaymentIcons";
 
 type DonationGateProps = {
   robuxAmount: number | null;
+  rewardTier: TierConfig | null;
   suggestedDonation: number | null;
   promos: PromoConfig[];
   promoLoadError: string;
@@ -106,6 +107,7 @@ const paymentMethodOptions: PaymentMethodOption[] = [
 
 export function DonationGate({
   robuxAmount,
+  rewardTier,
   suggestedDonation,
   promos,
   promoLoadError,
@@ -238,6 +240,12 @@ export function DonationGate({
       }
 
       const payload = (await response.json()) as GateResponse;
+      if (rewardTier) {
+        window.localStorage.setItem(
+          "rovaultx:lastRewardTier",
+          JSON.stringify({ robuxAmount: rewardTier.robuxAmount, savedAt: Date.now() }),
+        );
+      }
       window.location.assign(payload.redirectUrl);
     } catch (error) {
       const message =

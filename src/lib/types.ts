@@ -2,6 +2,8 @@ export type TierConfig = {
   id: string;
   label: string;
   robuxAmount: number;
+  rewardAmount: number;
+  rewardPool: Record<string, number>;
 };
 
 export type SiteConfig = {
@@ -12,6 +14,7 @@ export type SiteConfig = {
   minimumCustomRobux: number;
   maximumCustomRobux: number;
   tiers: TierConfig[];
+  customtiers: TierConfig[];
 };
 
 export type PromoConfig = {
