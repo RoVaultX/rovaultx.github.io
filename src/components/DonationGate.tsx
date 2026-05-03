@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "../lib/pricing";
+import { PaymentIcon, type PaymentMethodId } from "./PaymentIcons";
 
 type DonationGateProps = {
   robuxAmount: number | null;
@@ -14,33 +15,18 @@ type GateResponse = {
 type PaymentProvider = "paypal" | "stripe";
 
 type PaymentMethodOption = {
-  id: string;
+  id: PaymentMethodId;
   provider: PaymentProvider;
   label: string;
   description: string;
 };
 
 function PaymentMethodLogo({ methodId }: { methodId: PaymentMethodOption["id"] }) {
-  switch (methodId) {
-    case "paypal":
-      return <span className="payment-logo payment-logo-paypal" aria-hidden="true">P</span>;
-    case "venmo":
-      return <span className="payment-logo payment-logo-venmo" aria-hidden="true">V</span>;
-    case "cashapp":
-      return <span className="payment-logo payment-logo-cashapp" aria-hidden="true">$</span>;
-    case "card":
-      return <span className="payment-logo payment-logo-card" aria-hidden="true">C</span>;
-    case "bank":
-      return <span className="payment-logo payment-logo-bank" aria-hidden="true">B</span>;
-    case "klarna":
-      return <span className="payment-logo payment-logo-klarna" aria-hidden="true">K</span>;
-    case "link":
-      return <span className="payment-logo payment-logo-link" aria-hidden="true">L</span>;
-    case "amazonpay":
-      return <span className="payment-logo payment-logo-amazonpay" aria-hidden="true">A</span>;
-    default:
-      return null;
-  }
+  return (
+    <span className={`payment-logo payment-logo-${methodId}`} aria-hidden="true">
+      <PaymentIcon methodId={methodId} />
+    </span>
+  );
 }
 
 declare global {
@@ -75,18 +61,6 @@ const paymentMethodOptions: PaymentMethodOption[] = [
     description: "Pay with Cash App via Stripe Checkout.",
   },
   {
-    id: "card",
-    provider: "stripe",
-    label: "Debit/Credit Card",
-    description: "Pay securely with card via Stripe Checkout.",
-  },
-  {
-    id: "bank",
-    provider: "stripe",
-    label: "Bank Transfer",
-    description: "Pay from your bank account via Stripe Checkout.",
-  },
-  {
     id: "klarna",
     provider: "stripe",
     label: "Klarna",
@@ -104,6 +78,18 @@ const paymentMethodOptions: PaymentMethodOption[] = [
     label: "Amazon Pay",
     description: "Use Amazon Pay via Stripe Checkout.",
   },
+  {
+    id: "card",
+    provider: "stripe",
+    label: "Debit/Credit Card",
+    description: "Pay securely with card via Stripe Checkout.",
+  },
+  {
+    id: "bank",
+    provider: "stripe",
+    label: "Bank Transfer",
+    description: "Pay from your bank account via Stripe Checkout.",
+  },
 ];
 
 export function DonationGate({ robuxAmount, suggestedDonation, disabled }: DonationGateProps) {
@@ -112,7 +98,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [turnstileReady, setTurnstileReady] = useState(false);
-  const [selectedMethodId, setSelectedMethodId] = useState<string>("paypal");
+  const [selectedMethodId, setSelectedMethodId] = useState<PaymentMethodId>("paypal");
 
   const selectedMethod = useMemo(
     () => paymentMethodOptions.find((option) => option.id === selectedMethodId) ?? paymentMethodOptions[0],
@@ -204,7 +190,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
 
   return (
     <section>
-      <h2>Secure Donation Access</h2>
+      <h2>Secure Payment</h2>
       {!turnstileSiteKey && (
         <p className="helper-text warning">
           Captcha is not configured. Add `VITE_TURNSTILE_SITE_KEY` to enforce verification.
@@ -215,7 +201,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         <p className="helper-text">Loading verification challenge...</p>
       )}
       <p className="helper-text purchase-summary">
-        Complete verification, choose your payment method, then continue with your selected amount:
+        Choose your payment method then continue with your selected amount:
         {" "}
         <span className="price-highlight">
           {suggestedDonation ? formatUsd(suggestedDonation) : "$0.00"}
@@ -225,7 +211,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
       <fieldset className="payment-methods" disabled={disabled || isSubmitting}>
         <legend className="helper-text payment-methods-legend">Payment options</legend>
         {paymentMethodOptions.map((option) => (
-          <label key={option.id} className="payment-option">
+          <label key={option.id} className={`payment-option payment-option-${option.id}`}>
             <input
               type="radio"
               name="paymentMethod"
@@ -236,7 +222,9 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
             <span className="payment-option-content">
               <PaymentMethodLogo methodId={option.id} />
               <span>
-                <strong>{option.label}</strong>
+                <strong className={`payment-provider-name payment-provider-name-${option.id}`}>
+                  {option.label}
+                </strong>
                 <span className="helper-text payment-option-description">{option.description}</span>
               </span>
             </span>
@@ -255,7 +243,14 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         onClick={handleContinue}
         disabled={!canContinue || isSubmitting}
       >
-        {isSubmitting ? "Preparing secure redirect..." : `Continue with ${selectedMethod.label}`}
+        <span className="continue-button-content">
+          <span className={`payment-logo payment-logo-${selectedMethod.id}`} aria-hidden="true">
+            <PaymentIcon methodId={selectedMethod.id} />
+          </span>
+          <span>
+            {isSubmitting ? "Preparing secure redirect..." : `Continue with ${selectedMethod.label}`}
+          </span>
+        </span>
       </button>
       {errorMessage && <p className="helper-text warning">{errorMessage}</p>}
     </section>

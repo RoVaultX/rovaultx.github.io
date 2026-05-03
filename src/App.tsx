@@ -74,24 +74,40 @@ export default function App() {
 
   return (
     <main className="container">
-      <header>
-        <div className="logo-mark">R$</div>
-        <h1>{siteConfig.siteName}</h1>
-        <p className="subtitle">
-          Support the project through donation tiers with an exchange rate of $
-          {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux!
-        </p>
+      <header className="site-header">
+        <div className="site-header-body">
+          <div className="site-brand">
+            <div>
+              <div className="site-title-row">
+                <img
+                  className="site-logo"
+                  src="/RoVaultXLogo.png"
+                  alt={`${siteConfig.siteName} logo`}
+                  loading="eager"
+                  decoding="async"
+                />
+                <h1>{siteConfig.siteName}</h1>
+              </div>
+              <p className="subtitle">
+                Support the development of Primal Awakening through donation tiers. Contribute to new content, creator funding, and future updates—while receiving Robux at a rate of $
+                {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux!
+              </p>
+            </div>
+          </div>
+        </div>
       </header>
 
       <section className="stock-banner">
-        <strong>Current Stock:</strong>{" "}
-        <span className="stock-amount">R${stockRobux.toLocaleString()}</span>
-        {stockError && <p className="helper-text warning">{stockError}</p>}
+        <div className="stock-main">
+          <strong>Current Stock:</strong>{" "}
+          <span className="stock-amount">R${stockRobux.toLocaleString()}</span>
+        </div>
+        {stockError && <p className="stock-warning">{stockError}</p>}
         {stockStatus.isOutOfStock && (
-          <p className="helper-text warning">Out of stock. All support options are disabled.</p>
+          <p className="stock-warning">Out of stock. All support options are disabled.</p>
         )}
         {!stockStatus.isOutOfStock && stockStatus.isLowStock && (
-          <p className="helper-text warning">
+          <p className="stock-warning">
             Low stock. Higher tiers are disabled automatically.
           </p>
         )}

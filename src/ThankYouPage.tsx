@@ -3,10 +3,24 @@ import "./styles.css";
 export default function ThankYouPage() {
   return (
     <main className="container thank-you-page">
-      <header>
-        <div className="logo-mark">R$</div>
-        <h1>Purchase Received</h1>
-        <p className="subtitle">Thank you for your support. Complete the final step below.</p>
+      <header className="site-header">
+        <div className="site-header-body">
+          <div className="site-brand">
+            <img
+              className="site-logo"
+              src="/RoVaultXLogo.png"
+              alt="RoVaultX logo"
+              loading="eager"
+              decoding="async"
+            />
+            <div>
+              <div className="site-title-row">
+                <h1>Purchase Received</h1>
+              </div>
+              <p className="subtitle">Thank you for your support. Complete the final step below.</p>
+            </div>
+          </div>
+        </div>
       </header>
 
       <section>
