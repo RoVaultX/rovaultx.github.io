@@ -13,3 +13,8 @@ export type SiteConfig = {
   maximumCustomRobux: number;
   tiers: TierConfig[];
 };
+
+export type PromoConfig = {
+  code: string;
+  discountPercent: number;
+};

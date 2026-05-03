@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "../lib/pricing";
+import type { PromoConfig } from "../lib/types";
 import { PaymentIcon, type PaymentMethodId } from "./PaymentIcons";
 
 type DonationGateProps = {
   robuxAmount: number | null;
   suggestedDonation: number | null;
+  promos: PromoConfig[];
+  promoLoadError: string;
   disabled: boolean;
 };
 
@@ -41,6 +44,15 @@ declare global {
 
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 const workerApiBase = import.meta.env.VITE_WORKER_API_BASE ?? "";
+
+function normalizePromoCode(value: string): string {
+  return value.trim().toUpperCase();
+}
+
+function calculateDiscountedDonation(value: number, discountPercent: number): number {
+  return Math.max(0, Math.round(value * (1 - discountPercent / 100) * 100) / 100);
+}
+
 const paymentMethodOptions: PaymentMethodOption[] = [
   {
     id: "paypal",
@@ -92,13 +104,22 @@ const paymentMethodOptions: PaymentMethodOption[] = [
   },
 ];
 
-export function DonationGate({ robuxAmount, suggestedDonation, disabled }: DonationGateProps) {
+export function DonationGate({
+  robuxAmount,
+  suggestedDonation,
+  promos,
+  promoLoadError,
+  disabled,
+}: DonationGateProps) {
   const [token, setToken] = useState("");
   const [widgetId, setWidgetId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [turnstileReady, setTurnstileReady] = useState(false);
   const [selectedMethodId, setSelectedMethodId] = useState<PaymentMethodId>("paypal");
+  const [promoInputValue, setPromoInputValue] = useState("");
+  const [appliedPromoCode, setAppliedPromoCode] = useState("");
+  const [promoMessage, setPromoMessage] = useState("");
 
   const selectedMethod = useMemo(
     () => paymentMethodOptions.find((option) => option.id === selectedMethodId) ?? paymentMethodOptions[0],
@@ -107,15 +128,55 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
 
   const requiresCaptcha = Boolean(turnstileSiteKey);
 
+  const appliedPromo = useMemo(
+    () => promos.find((promo) => promo.code === appliedPromoCode) ?? null,
+    [appliedPromoCode, promos],
+  );
+
+  const finalDonation = useMemo(() => {
+    if (!suggestedDonation) {
+      return null;
+    }
+    if (!appliedPromo) {
+      return suggestedDonation;
+    }
+    return calculateDiscountedDonation(suggestedDonation, appliedPromo.discountPercent);
+  }, [appliedPromo, suggestedDonation]);
+
+  const discountAmount = useMemo(() => {
+    if (!suggestedDonation || finalDonation === null) {
+      return null;
+    }
+    return Math.max(0, Math.round((suggestedDonation - finalDonation) * 100) / 100);
+  }, [finalDonation, suggestedDonation]);
+
   const canContinue = useMemo(() => {
-    if (!robuxAmount || !suggestedDonation || disabled) {
+    if (!robuxAmount || !finalDonation || disabled) {
       return false;
     }
     if (!requiresCaptcha) {
       return true;
     }
     return Boolean(token);
-  }, [disabled, robuxAmount, requiresCaptcha, suggestedDonation, token]);
+  }, [disabled, finalDonation, robuxAmount, requiresCaptcha, token]);
+
+  function handleApplyPromo() {
+    const normalizedCode = normalizePromoCode(promoInputValue);
+    if (!normalizedCode) {
+      setAppliedPromoCode("");
+      setPromoMessage("Enter a promo code to apply a discount.");
+      return;
+    }
+    const matchingPromo = promos.find((promo) => promo.code === normalizedCode);
+    if (!matchingPromo) {
+      setAppliedPromoCode("");
+      setPromoMessage("Promo code not recognized.");
+      return;
+    }
+    setAppliedPromoCode(matchingPromo.code);
+    setPromoInputValue(matchingPromo.code);
+    setPromoMessage(`${matchingPromo.code} applied for ${matchingPromo.discountPercent}% off.`);
+  }
 
   useEffect(() => {
     if (!requiresCaptcha) {
@@ -149,7 +210,7 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
   }, [requiresCaptcha, turnstileSiteKey, widgetId]);
 
   async function handleContinue() {
-    if (!canContinue || !robuxAmount || !suggestedDonation) {
+    if (!canContinue || !robuxAmount || !finalDonation) {
       return;
     }
 
@@ -163,7 +224,10 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         body: JSON.stringify({
           token,
           robuxAmount,
-          suggestedDonation,
+          suggestedDonation: finalDonation,
+          originalSuggestedDonation: suggestedDonation,
+          promoCode: appliedPromo?.code ?? null,
+          promoDiscountPercent: appliedPromo?.discountPercent ?? 0,
           paymentProvider: selectedMethod.provider,
         }),
       });
@@ -204,10 +268,62 @@ export function DonationGate({ robuxAmount, suggestedDonation, disabled }: Donat
         Choose your payment method then continue with your selected amount:
         {" "}
         <span className="price-highlight">
-          {suggestedDonation ? formatUsd(suggestedDonation) : "$0.00"}
+          {finalDonation !== null ? formatUsd(finalDonation) : "$0.00"}
         </span>
+        {appliedPromo && suggestedDonation && discountAmount !== null && discountAmount > 0 && (
+          <>
+            {" "}
+            <span className="promo-original-price">{formatUsd(suggestedDonation)}</span>
+            {" "}
+            <span className="promo-savings">Save {formatUsd(discountAmount)}</span>
+          </>
+        )}
         .
       </p>
+      <div className="promo-card">
+        <div>
+          <strong className="promo-title">Promo code</strong>
+          <span className="helper-text promo-subtitle">Enter a code before secure payout.</span>
+        </div>
+        <div className="promo-entry">
+          <input
+            className="promo-input"
+            type="text"
+            value={promoInputValue}
+            onChange={(event) => {
+              setPromoInputValue(event.target.value);
+              if (!appliedPromo) {
+                setPromoMessage("");
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleApplyPromo();
+              }
+            }}
+            placeholder="PROMOCODE"
+            disabled={disabled || isSubmitting}
+          />
+          <button
+            className="promo-apply-button"
+            type="button"
+            onClick={handleApplyPromo}
+            disabled={disabled || isSubmitting}
+          >
+            Apply
+          </button>
+        </div>
+        {appliedPromo && (
+          <p className="promo-message promo-message-success">
+            Currently applied: {appliedPromo.code} for {appliedPromo.discountPercent}% off.
+          </p>
+        )}
+        {!appliedPromo && promoMessage && (
+          <p className="promo-message promo-message-error">{promoMessage}</p>
+        )}
+        {promoLoadError && <p className="promo-message promo-message-error">{promoLoadError}</p>}
+      </div>
       <fieldset className="payment-methods" disabled={disabled || isSubmitting}>
         <legend className="helper-text payment-methods-legend">Payment options</legend>
         {paymentMethodOptions.map((option) => (
