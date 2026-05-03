@@ -39,13 +39,15 @@ export default function AdminPage() {
         body: JSON.stringify({ username, password }),
       });
       if (!response.ok) {
-        throw new Error("Invalid admin login.");
+        const text = await response.text();
+        throw new Error(text || "Invalid admin login.");
       }
       setIsAuthenticated(true);
       setPassword("");
     } catch (error) {
       setIsAuthenticated(false);
-      setLoginMessage(error instanceof Error ? error.message : "Unable to login.");
+      const message = error instanceof Error ? error.message : "Unable to login.";
+      setLoginMessage(message === "Failed to fetch" ? "Unable to reach admin login service." : message);
     }
   }
 

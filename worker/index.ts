@@ -4,6 +4,8 @@ type Env = {
   STRIPE_DONATION_URL: string;
   FRONTEND_ORIGIN: string;
   HANDOFF_SECRET: string;
+  ADMIN_USERNAME: string;
+  ADMIN_PASSWORD: string;
 };
 
 type TurnstileVerifyResponse = {
@@ -95,6 +97,19 @@ function isRateLimited(ip: string): boolean {
 
 function getRateLimitKey(ip: string | null): string {
   return ip ?? "anonymous";
+}
+
+function constantTimeEqual(left: string, right: string): boolean {
+  const leftBytes = encoder.encode(left);
+  const rightBytes = encoder.encode(right);
+  const length = Math.max(leftBytes.length, rightBytes.length);
+  let diff = leftBytes.length ^ rightBytes.length;
+
+  for (let index = 0; index < length; index += 1) {
+    diff |= (leftBytes[index] ?? 0) ^ (rightBytes[index] ?? 0);
+  }
+
+  return diff === 0;
 }
 
 function buildPayPalRedirectUrl(baseUrl: string, frontendOrigin: string): string {
@@ -220,6 +235,31 @@ export default {
         200,
         allowedOrigin,
       );
+    }
+
+    if (url.pathname === "/api/admin-login" && request.method === "POST") {
+      if (origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      if (isRateLimited(getRateLimitKey(requestIp))) {
+        return jsonResponse({ error: "Too many requests. Try again later." }, 429, allowedOrigin);
+      }
+
+      const payload = (await request.json()) as {
+        username?: string;
+        password?: string;
+      };
+      const username = payload.username ?? "";
+      const password = payload.password ?? "";
+
+      if (
+        constantTimeEqual(username, env.ADMIN_USERNAME) &&
+        constantTimeEqual(password, env.ADMIN_PASSWORD)
+      ) {
+        return jsonResponse({ ok: true }, 200, allowedOrigin);
+      }
+
+      return jsonResponse({ error: "Invalid admin login." }, 401, allowedOrigin);
     }
 
     if (url.pathname.startsWith("/r/") && request.method === "GET") {
