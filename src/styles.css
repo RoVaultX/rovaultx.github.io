@@ -613,6 +613,17 @@ section h2 {
   opacity: 0.55;
 }
 
+.promo-input:-webkit-autofill,
+.promo-input:-webkit-autofill:hover,
+.promo-input:-webkit-autofill:focus,
+.promo-input:-webkit-autofill:active {
+  border-color: rgba(117, 255, 174, 0.42);
+  box-shadow: 0 0 0 1000px #050707 inset, inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 .promo-discount-input {
   text-transform: none;
 }
