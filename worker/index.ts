@@ -266,7 +266,7 @@ export default {
         status: 204,
         headers: {
           "access-control-allow-origin": allowedOrigin,
-          "access-control-allow-methods": "POST, GET, OPTIONS",
+          "access-control-allow-methods": "POST, GET, PUT, OPTIONS",
           "access-control-allow-headers": "authorization, content-type",
         },
       });
