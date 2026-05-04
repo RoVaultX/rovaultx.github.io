@@ -4,3 +4,11 @@ compatibility_date = "2026-04-26"
 
 [vars]
 FRONTEND_ORIGIN = "https://rovaultx.github.io"
+
+[[kv_namespaces]]
+binding = "PROMOS_KV"
+id = "c74702d5d65849c5a288e09bbc6db699"
+
+[[kv_namespaces]]
+binding = "STOCK_KV"
+id = "f4efb59d44a94481a4dbaf11a85d9434"

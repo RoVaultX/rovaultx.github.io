@@ -613,6 +613,21 @@ section h2 {
   opacity: 0.55;
 }
 
+.promo-discount-input {
+  text-transform: none;
+}
+
+.promo-discount-input::-webkit-outer-spin-button,
+.promo-discount-input::-webkit-inner-spin-button {
+  opacity: 0.9;
+  filter: invert(1) brightness(1.15) contrast(1.15);
+}
+
+.promo-discount-input[type="number"] {
+  appearance: auto;
+  -moz-appearance: auto;
+}
+
 .promo-apply-button {
   flex-shrink: 0;
   padding: 0.78rem 1rem;
@@ -998,6 +1013,63 @@ section h2 {
 .admin-form label {
   display: grid;
   gap: 0.35rem;
+}
+
+.admin-panel-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.admin-panel-button-active {
+  border-color: rgba(117, 255, 174, 0.55);
+  box-shadow: 0 0 26px rgba(36, 229, 120, 0.18);
+}
+
+.admin-section-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.admin-promo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.admin-promo-card {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(223, 232, 227, 0.10);
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(2, 4, 4, 0.48);
+}
+
+.admin-promo-card label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.admin-remove-button {
+  border: 1px solid rgba(255, 103, 103, 0.35);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  background: rgba(255, 103, 103, 0.08);
+  color: #ffd2d2;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.admin-remove-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 103, 103, 0.6);
+  background: rgba(255, 103, 103, 0.14);
 }
 
 .admin-select {

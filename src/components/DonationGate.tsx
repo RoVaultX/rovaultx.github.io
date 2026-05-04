@@ -7,13 +7,19 @@ type DonationGateProps = {
   robuxAmount: number | null;
   rewardTier: TierConfig | null;
   suggestedDonation: number | null;
-  promos: PromoConfig[];
-  promoLoadError: string;
   disabled: boolean;
 };
 
 type GateResponse = {
   redirectUrl: string;
+};
+
+type PromoValidationResponse = {
+  valid?: boolean;
+  code?: string;
+  discountPercent?: number;
+  finalDonation?: number;
+  error?: string;
 };
 
 type PaymentProvider = "paypal" | "stripe";
@@ -45,6 +51,8 @@ declare global {
 
 const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 const workerApiBase = import.meta.env.VITE_WORKER_API_BASE ?? "";
+const LOCAL_PROMOS_STORAGE_KEY = "rovaultx:localPromos";
+const isLocalPromoValidationEnabled = import.meta.env.DEV && !workerApiBase;
 
 function normalizePromoCode(value: string): string {
   return value.trim().toUpperCase();
@@ -52,6 +60,19 @@ function normalizePromoCode(value: string): string {
 
 function calculateDiscountedDonation(value: number, discountPercent: number): number {
   return Math.max(0, Math.round(value * (1 - discountPercent / 100) * 100) / 100);
+}
+
+function readLocalPromos(): PromoConfig[] {
+  const storedPromos = window.localStorage.getItem(LOCAL_PROMOS_STORAGE_KEY);
+  if (!storedPromos) {
+    return [];
+  }
+  try {
+    const payload = JSON.parse(storedPromos) as { promos?: PromoConfig[] };
+    return Array.isArray(payload.promos) ? payload.promos : [];
+  } catch {
+    return [];
+  }
 }
 
 const paymentMethodOptions: PaymentMethodOption[] = [
@@ -109,8 +130,6 @@ export function DonationGate({
   robuxAmount,
   rewardTier,
   suggestedDonation,
-  promos,
-  promoLoadError,
   disabled,
 }: DonationGateProps) {
   const [token, setToken] = useState("");
@@ -120,8 +139,9 @@ export function DonationGate({
   const [turnstileReady, setTurnstileReady] = useState(false);
   const [selectedMethodId, setSelectedMethodId] = useState<PaymentMethodId>("paypal");
   const [promoInputValue, setPromoInputValue] = useState("");
-  const [appliedPromoCode, setAppliedPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<PromoConfig | null>(null);
   const [promoMessage, setPromoMessage] = useState("");
+  const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   const selectedMethod = useMemo(
     () => paymentMethodOptions.find((option) => option.id === selectedMethodId) ?? paymentMethodOptions[0],
@@ -129,11 +149,6 @@ export function DonationGate({
   );
 
   const requiresCaptcha = Boolean(turnstileSiteKey);
-
-  const appliedPromo = useMemo(
-    () => promos.find((promo) => promo.code === appliedPromoCode) ?? null,
-    [appliedPromoCode, promos],
-  );
 
   const finalDonation = useMemo(() => {
     if (!suggestedDonation) {
@@ -162,22 +177,58 @@ export function DonationGate({
     return Boolean(token);
   }, [disabled, finalDonation, robuxAmount, requiresCaptcha, token]);
 
-  function handleApplyPromo() {
+  async function handleApplyPromo() {
     const normalizedCode = normalizePromoCode(promoInputValue);
     if (!normalizedCode) {
-      setAppliedPromoCode("");
+      setAppliedPromo(null);
       setPromoMessage("Enter a promo code to apply a discount.");
       return;
     }
-    const matchingPromo = promos.find((promo) => promo.code === normalizedCode);
-    if (!matchingPromo) {
-      setAppliedPromoCode("");
-      setPromoMessage("Promo code not recognized.");
+    if (!suggestedDonation) {
+      setAppliedPromo(null);
+      setPromoMessage("Select a tier before applying a promo code.");
       return;
     }
-    setAppliedPromoCode(matchingPromo.code);
-    setPromoInputValue(matchingPromo.code);
-    setPromoMessage(`${matchingPromo.code} applied for ${matchingPromo.discountPercent}% off.`);
+    setIsApplyingPromo(true);
+    setPromoMessage("");
+    try {
+      if (isLocalPromoValidationEnabled) {
+        const promo = readLocalPromos().find((item) => normalizePromoCode(item.code) === normalizedCode);
+        if (!promo) {
+          setAppliedPromo(null);
+          setPromoMessage("Promo code not recognized.");
+          return;
+        }
+        const discountPercent = Math.min(100, Math.max(0, Number(promo.discountPercent)));
+        setAppliedPromo({ code: normalizePromoCode(promo.code), discountPercent });
+        setPromoInputValue(normalizePromoCode(promo.code));
+        setPromoMessage(`${normalizePromoCode(promo.code)} applied for ${discountPercent}% off.`);
+        return;
+      }
+      const response = await fetch(`${workerApiBase}/api/validate-promo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: normalizedCode, suggestedDonation }),
+      });
+      const responseText = await response.text();
+      const payload = responseText ? JSON.parse(responseText) as PromoValidationResponse : {};
+      if (!response.ok) {
+        throw new Error(payload.error ?? "Could not validate promo code.");
+      }
+      if (!payload.valid || !payload.code || !payload.discountPercent) {
+        setAppliedPromo(null);
+        setPromoMessage("Promo code not recognized.");
+        return;
+      }
+      setAppliedPromo({ code: payload.code, discountPercent: payload.discountPercent });
+      setPromoInputValue(payload.code);
+      setPromoMessage(`${payload.code} applied for ${payload.discountPercent}% off.`);
+    } catch (error) {
+      setAppliedPromo(null);
+      setPromoMessage(error instanceof Error ? error.message : "Could not validate promo code.");
+    } finally {
+      setIsApplyingPromo(false);
+    }
   }
 
   useEffect(() => {
@@ -300,9 +351,8 @@ export function DonationGate({
             value={promoInputValue}
             onChange={(event) => {
               setPromoInputValue(event.target.value);
-              if (!appliedPromo) {
-                setPromoMessage("");
-              }
+              setAppliedPromo(null);
+              setPromoMessage("");
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
@@ -311,15 +361,15 @@ export function DonationGate({
               }
             }}
             placeholder="PROMOCODE"
-            disabled={disabled || isSubmitting}
+            disabled={disabled || isSubmitting || isApplyingPromo}
           />
           <button
             className="promo-apply-button"
             type="button"
             onClick={handleApplyPromo}
-            disabled={disabled || isSubmitting}
+            disabled={disabled || isSubmitting || isApplyingPromo}
           >
-            Apply
+            {isApplyingPromo ? "Checking..." : "Apply"}
           </button>
         </div>
         {appliedPromo && (
@@ -330,7 +380,6 @@ export function DonationGate({
         {!appliedPromo && promoMessage && (
           <p className="promo-message promo-message-error">{promoMessage}</p>
         )}
-        {promoLoadError && <p className="promo-message promo-message-error">{promoLoadError}</p>}
       </div>
       <fieldset className="payment-methods" disabled={disabled || isSubmitting}>
         <legend className="helper-text payment-methods-legend">Payment options</legend>

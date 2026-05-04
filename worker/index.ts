@@ -1,3 +1,8 @@
+type KVNamespace = {
+  get(key: string, type: "json"): Promise<unknown>;
+  put(key: string, value: string): Promise<void>;
+};
+
 type Env = {
   TURNSTILE_SECRET_KEY: string;
   PAYPAL_DONATION_URL: string;
@@ -6,6 +11,8 @@ type Env = {
   HANDOFF_SECRET: string;
   ADMIN_USERNAME: string;
   ADMIN_PASSWORD: string;
+  PROMOS_KV: KVNamespace;
+  STOCK_KV: KVNamespace;
 };
 
 type TurnstileVerifyResponse = {
@@ -16,6 +23,19 @@ type TurnstileVerifyResponse = {
 type TurnstileVerifyResult = {
   success: boolean;
   errorCodes: string[];
+};
+
+type PromoConfig = {
+  code: string;
+  discountPercent: number;
+};
+
+type PromoStore = {
+  promos: PromoConfig[];
+};
+
+type StockStore = {
+  stockRobux: number;
 };
 
 const rateMap = new Map<string, number[]>();
@@ -69,10 +89,80 @@ async function verifySignedToken(token: string, secret: string) {
     return JSON.parse(payloadText) as {
       exp?: number;
       paymentProvider?: "paypal" | "stripe";
+      role?: string;
     };
   } catch {
     return null;
   }
+}
+
+function normalizePromoCode(value: string): string {
+  return value.trim().toUpperCase();
+}
+
+function parsePromoStore(rawValue: unknown): PromoStore {
+  if (!rawValue || typeof rawValue !== "object") {
+    return { promos: [] };
+  }
+  const maybePromos = (rawValue as { promos?: unknown }).promos;
+  if (!Array.isArray(maybePromos)) {
+    return { promos: [] };
+  }
+  return {
+    promos: maybePromos.flatMap((rawPromo) => {
+      if (!rawPromo || typeof rawPromo !== "object") {
+        return [];
+      }
+      const promo = rawPromo as { code?: unknown; discountPercent?: unknown };
+      if (typeof promo.code !== "string") {
+        return [];
+      }
+      const code = normalizePromoCode(promo.code);
+      const discountPercent = Number(promo.discountPercent);
+      if (!code || !Number.isFinite(discountPercent) || discountPercent <= 0) {
+        return [];
+      }
+      return [{
+        code,
+        discountPercent: Math.min(100, Math.round(discountPercent * 100) / 100),
+      }];
+    }),
+  };
+}
+
+async function readPromoStore(env: Env): Promise<PromoStore> {
+  const stored = await env.PROMOS_KV.get("promos", "json");
+  return parsePromoStore(stored);
+}
+
+function parseStockStore(rawValue: unknown): StockStore {
+  if (!rawValue || typeof rawValue !== "object") {
+    return { stockRobux: 0 };
+  }
+  const stockRobux = Number((rawValue as { stockRobux?: unknown }).stockRobux);
+  if (!Number.isFinite(stockRobux) || stockRobux < 0) {
+    return { stockRobux: 0 };
+  }
+  return { stockRobux: Math.round(stockRobux) };
+}
+
+async function readStockStore(env: Env): Promise<StockStore> {
+  const stored = await env.STOCK_KV.get("stock", "json");
+  return parseStockStore(stored);
+}
+
+function calculateDiscountedDonation(value: number, discountPercent: number): number {
+  return Math.max(0, Math.round(value * (1 - discountPercent / 100) * 100) / 100);
+}
+
+async function isAuthorizedAdmin(request: Request, env: Env): Promise<boolean> {
+  const authorization = request.headers.get("Authorization") ?? "";
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (!token) {
+    return false;
+  }
+  const verified = await verifySignedToken(token, env.HANDOFF_SECRET);
+  return Boolean(verified?.exp && verified.role === "admin" && Date.now() / 1000 <= verified.exp);
 }
 
 function jsonResponse(body: unknown, status = 200, origin?: string): Response {
@@ -177,9 +267,51 @@ export default {
         headers: {
           "access-control-allow-origin": allowedOrigin,
           "access-control-allow-methods": "POST, GET, OPTIONS",
-          "access-control-allow-headers": "content-type",
+          "access-control-allow-headers": "authorization, content-type",
         },
       });
+    }
+
+    if (url.pathname === "/api/validate-promo" && request.method === "POST") {
+      if (origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      if (isRateLimited(getRateLimitKey(requestIp))) {
+        return jsonResponse({ error: "Too many requests. Try again later." }, 429, allowedOrigin);
+      }
+
+      const payload = (await request.json()) as {
+        code?: string;
+        suggestedDonation?: number;
+      };
+      const code = normalizePromoCode(payload.code ?? "");
+      if (!code || !payload.suggestedDonation || !Number.isFinite(payload.suggestedDonation)) {
+        return jsonResponse({ error: "Invalid request body." }, 400, allowedOrigin);
+      }
+
+      const store = await readPromoStore(env);
+      const promo = store.promos.find((item) => item.code === code);
+      if (!promo) {
+        return jsonResponse({ valid: false }, 200, allowedOrigin);
+      }
+
+      return jsonResponse(
+        {
+          valid: true,
+          code: promo.code,
+          discountPercent: promo.discountPercent,
+          finalDonation: calculateDiscountedDonation(payload.suggestedDonation, promo.discountPercent),
+        },
+        200,
+        allowedOrigin,
+      );
+    }
+
+    if (url.pathname === "/api/stock" && request.method === "GET") {
+      if (origin && origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      return jsonResponse(await readStockStore(env), 200, allowedOrigin);
     }
 
     if (url.pathname === "/api/create-handoff" && request.method === "POST") {
@@ -194,6 +326,8 @@ export default {
         token?: string;
         robuxAmount?: number;
         suggestedDonation?: number;
+        originalSuggestedDonation?: number;
+        promoCode?: string | null;
         paymentProvider?: "paypal" | "stripe";
       };
 
@@ -207,6 +341,19 @@ export default {
       }
       if (payload.paymentProvider !== "paypal" && payload.paymentProvider !== "stripe") {
         return jsonResponse({ error: "Invalid payment provider." }, 400, allowedOrigin);
+      }
+
+      if (payload.promoCode) {
+        const originalSuggestedDonation = Number(payload.originalSuggestedDonation);
+        if (!Number.isFinite(originalSuggestedDonation) || originalSuggestedDonation <= 0) {
+          return jsonResponse({ error: "Invalid promo request." }, 400, allowedOrigin);
+        }
+        const store = await readPromoStore(env);
+        const promo = store.promos.find((item) => item.code === normalizePromoCode(payload.promoCode ?? ""));
+        const expectedDonation = promo ? calculateDiscountedDonation(originalSuggestedDonation, promo.discountPercent) : null;
+        if (!promo || expectedDonation !== payload.suggestedDonation) {
+          return jsonResponse({ error: "Invalid promo code." }, 400, allowedOrigin);
+        }
       }
 
       const captchaResult = await verifyTurnstile(payload.token, env, requestIp);
@@ -256,10 +403,61 @@ export default {
         constantTimeEqual(username, env.ADMIN_USERNAME) &&
         constantTimeEqual(password, env.ADMIN_PASSWORD)
       ) {
-        return jsonResponse({ ok: true }, 200, allowedOrigin);
+        const token = await createSignedToken(
+          {
+            exp: Math.floor(Date.now() / 1000) + 86_400,
+            role: "admin",
+          },
+          env.HANDOFF_SECRET,
+        );
+        return jsonResponse({ ok: true, token }, 200, allowedOrigin);
       }
 
       return jsonResponse({ error: "Invalid admin login." }, 401, allowedOrigin);
+    }
+
+    if (url.pathname === "/api/admin/promos" && request.method === "GET") {
+      if (origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      if (!(await isAuthorizedAdmin(request, env))) {
+        return jsonResponse({ error: "Admin authorization required." }, 401, allowedOrigin);
+      }
+      return jsonResponse(await readPromoStore(env), 200, allowedOrigin);
+    }
+
+    if (url.pathname === "/api/admin/promos" && request.method === "PUT") {
+      if (origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      if (!(await isAuthorizedAdmin(request, env))) {
+        return jsonResponse({ error: "Admin authorization required." }, 401, allowedOrigin);
+      }
+      const store = parsePromoStore(await request.json());
+      await env.PROMOS_KV.put("promos", JSON.stringify(store));
+      return jsonResponse(store, 200, allowedOrigin);
+    }
+
+    if (url.pathname === "/api/admin/stock" && request.method === "GET") {
+      if (origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      if (!(await isAuthorizedAdmin(request, env))) {
+        return jsonResponse({ error: "Admin authorization required." }, 401, allowedOrigin);
+      }
+      return jsonResponse(await readStockStore(env), 200, allowedOrigin);
+    }
+
+    if (url.pathname === "/api/admin/stock" && request.method === "PUT") {
+      if (origin !== allowedOrigin) {
+        return jsonResponse({ error: "Origin not allowed." }, 403, allowedOrigin);
+      }
+      if (!(await isAuthorizedAdmin(request, env))) {
+        return jsonResponse({ error: "Admin authorization required." }, 401, allowedOrigin);
+      }
+      const store = parseStockStore(await request.json());
+      await env.STOCK_KV.put("stock", JSON.stringify(store));
+      return jsonResponse(store, 200, allowedOrigin);
     }
 
     if (url.pathname.startsWith("/r/") && request.method === "GET") {
