@@ -266,9 +266,9 @@ export default function AdminPage() {
         <div className="site-header-body">
           <div className="site-title-row">
             <img className="site-logo" src="/RoVaultXLogo.png" alt="RoVaultX logo" />
-            <h1>Admin Rewards</h1>
+            <h1>Admin Panel</h1>
           </div>
-          <p className="subtitle">Generate the exact reward rolls to grant after completing Robux delivery.</p>
+          <p className="subtitle">Gain access to website administrative actions and other features such as post-purchase rewards rolling.</p>
         </div>
       </header>
 
