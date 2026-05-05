@@ -74,9 +74,7 @@
         "2 Destiny Knots": 3,
         "2 Mints of Choice": 3
       }
-    }
-  ],
-  "customtiers": [
+    },
     {
       "id": "champion",
       "label": "Champion",
@@ -158,5 +156,6 @@
         "5 Bottlecaps": 4
       }
     }
-  ]
+  ],
+  "customtiers": []
 }

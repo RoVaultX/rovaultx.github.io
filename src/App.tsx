@@ -110,9 +110,10 @@ export default function App() {
                 />
                 <h1>{siteConfig.siteName}</h1>
               </div>
+              <p className="site-kicker">Secure Vendor</p>
+              <p className="site-meta">Fast Fullfillment • Tier-Based Rewards System • Built for your needs</p>
               <p className="subtitle">
-                Support the development of Primal Awakening through donation tiers. Contribute to new content, creator funding, and future updates—while receiving Robux at a rate of $
-                {siteConfig.rateUsdPer1000Robux.toFixed(2)} per 1,000 Robux and generated rewards based on your selected tier!
+                Support the Primal Awakening project with transparent pricing, secure checkout, and tier-based rewards.
               </p>
             </div>
           </div>

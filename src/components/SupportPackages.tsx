@@ -31,7 +31,7 @@ export function SupportPackages({
   onCustomChange,
   onSelect,
 }: SupportPackagesProps) {
-  const stackWords = (value: string) => value.split(" ").join("\n");
+  const stackWords = (value: string) => value;
   const boundedMax = Math.min(maximumCustomRobux, Math.max(minimumCustomRobux, stockRobux));
   const safeCustomValue = clampWholeNumber(customValue, minimumCustomRobux, boundedMax);
   const customDisabled = !canFulfillRequest(safeCustomValue, stockRobux, isOutOfStock);

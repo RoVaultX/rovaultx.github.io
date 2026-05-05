@@ -59,7 +59,7 @@ export default function ThankYouPage() {
         </ul>
       </section>
 
-      <RewardsPanel tier={rewardTier} title="Rewards You Could Have Received" />
+      <RewardsPanel tier={rewardTier} title="Rewards You Could Receive" />
 
       <section>
         <h2>Discord Support</h2>

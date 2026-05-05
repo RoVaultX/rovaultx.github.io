@@ -16,6 +16,11 @@ type RouletteSpinnerGroupProps = {
   title?: string;
 };
 
+const CASE_ITEM_WIDTH_PX = 150;
+const CASE_ITEM_GAP_PX = 12;
+const CASE_ITEM_PITCH_PX = CASE_ITEM_WIDTH_PX + CASE_ITEM_GAP_PX;
+const CASE_ITEM_CENTER_OFFSET_PX = CASE_ITEM_WIDTH_PX / 2;
+
 export function RouletteSpinner({ tier, title = "Test Your Luck", spinKey, hideButton = false, forcedReward, onResult }: RouletteSpinnerProps) {
   const rewards = useMemo(() => getRewardItems(tier), [tier]);
   const reelItems = useMemo(() => Array.from({ length: 10 }, () => rewards).flat(), [rewards]);
@@ -95,7 +100,9 @@ export function RouletteSpinner({ tier, title = "Test Your Luck", spinKey, hideB
         <div className="case-marker" />
         <div
           className={`case-reel ${isReelAnimating ? "spinning" : ""}`}
-          style={{ transform: `translateX(calc(50% - ${reelIndex} * 160px - 75px))` }}
+          style={{
+            transform: `translateX(calc(50% - ${reelIndex} * ${CASE_ITEM_PITCH_PX}px - ${CASE_ITEM_CENTER_OFFSET_PX}px))`,
+          }}
         >
           {reelItems.map((reward, index) => (
             <div

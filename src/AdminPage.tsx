@@ -268,7 +268,7 @@ export default function AdminPage() {
             <img className="site-logo" src="/RoVaultXLogo.png" alt="RoVaultX logo" />
             <h1>Admin Panel</h1>
           </div>
-          <p className="subtitle">Gain access to website administrative actions and other features such as post-purchase rewards rolling.</p>
+          <p className="subtitle">Gain access to website administrative actions, promo codes, stock management, reward generation, and more.</p>
         </div>
       </header>
 
@@ -298,7 +298,7 @@ export default function AdminPage() {
       {isAuthenticated && selectedTier && (
         <>
           <section>
-            <h2>Admin Panel</h2>
+            <h2>Admin Actions</h2>
             <div className="admin-panel-actions">
               <button className={`promo-apply-button ${activePanel === "promos" ? "admin-panel-button-active" : ""}`} type="button" onClick={() => setActivePanel("promos")}>
                 Edit Promos
